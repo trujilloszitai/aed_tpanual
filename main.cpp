@@ -63,10 +63,10 @@ struct nodoLT {
 };
 
 void menu(int &);
-void menuPacientes();
-void menuMedicos();
-void menuEspecialidades();
-void menuTurnos();
+void gestionPacientes(int &);
+void gestionMedicos(int &);
+void gestionEspecialidades(int &);
+void gestionTurnos(int &);
 void pushPaciente(nodoP *&, Paciente);
 void pushMedico(nodoM *&, Medico);
 void pushTurno(nodoT *&, infoT);
@@ -96,7 +96,7 @@ int main() {
   // cargarArchivoPacientes(fPacientes, pacientes);
   // cargarArchivoMedicos(fMedicos, medicos);
   // cargarArchivoTurnos(fTurnos, turnos);
-  int opcion;
+  int opcion = 0;
   while (true)
     menu(opcion);
 
@@ -162,41 +162,53 @@ void cargarArchivoTurnos(FILE *f, infoT turnos[]) {
 }
 void menu(int &opcion) {
   int accion = -1;
-  switch (opcion) {
-  case 1:
-    cout << "Gestión de Pacientes - Seleccione una acción" << endl;
-    cout << "Nuevo paciente (1)" << endl;
-    cout << "Buscar paciente (2)" << endl;
-    cout << "Listar pacientes (3)" << endl;
+  if (opcion != 0) {
+    switch (opcion) {
+    case 1:
+      cout << "Gestión de Pacientes - Seleccione una acción" << endl;
+      cout << "Nuevo paciente (1)" << endl;
+      cout << "Buscar paciente (2)" << endl;
+      cout << "Listar pacientes (3)" << endl;
+      break;
+    case 2:
+      cout << "Gestión de Médicos - Seleccione una acción" << endl;
+      cout << "Nuevo médico (1)" << endl;
+      cout << "Buscar médico (2)" << endl;
+      cout << "Listar médicos (3)" << endl;
+      cout << "Ver atenciones efectivas (4)" << endl;
+      break;
+    case 3:
+      cout << "Gestión de Turnos - Seleccione una acción" << endl;
+      cout << "Listar especialidades (1)" << endl;
+      cout << "Buscar especialidad (2)" << endl;
+      break;
+    case 4:
+      cout << "Gestión de Turnos - Seleccione una acción" << endl;
+      cout << "Nuevo turno (1)" << endl;
+      cout << "Actualizar turno (2)" << endl;
+      cout << "Turnos pendientes (3)" << endl;
+      cout << "Ver cancelaciones (4)" << endl;
+      break;
+    }
     cout << "Volver (0)" << endl;
     cin >> accion;
-    break;
-  case 2:
-    cout << "Gestión de Médicos - Seleccione una acción" << endl;
-    cout << "Nuevo médico (1)" << endl;
-    cout << "Buscar médico (2)" << endl;
-    cout << "Listar médicos (3)" << endl;
-    cout << "Ver atenciones efectivas (4)" << endl;
-    cout << "Volver (0)" << endl;
-    cin >> accion;
-    break;
-  case 3:
-    cout << "Gestión de Turnos - Seleccione una acción" << endl;
-    cout << "Listar especialidades (1)" << endl;
-    cout << "Buscar especialidad (2)" << endl;
-    cout << "Volver (0)" << endl;
-    cin >> accion;
-    break;
-  case 4:
-    cout << "Gestión de Turnos - Seleccione una acción" << endl;
-    cout << "Nuevo turno (1)" << endl;
-    cout << "Actualizar turno (2)" << endl;
-    cout << "Turnos pendientes (3)" << endl;
-    cout << "Ver cancelaciones (4)" << endl;
-    cout << "Volver (0)" << endl;
-    cin >> accion;
-    break;
-  default:
+    if (accion != 0) {
+      switch (opcion) {
+      case 1:
+        gestionPacientes(accion);
+        break;
+      case 2:
+        gestionMedicos(accion);
+        break;
+      case 3:
+        gestionEspecialidades(accion);
+        break;
+      case 4:
+        gestionTurnos(accion);
+        break;
+      }
+    }
+  } else {
     cout << "Bienvenido al sistema de gestión de turnos de la clínica "
          << "\"Clínica Genial\"" << endl;
     cout << "Menú principal - Seleccione una opción" << endl;
@@ -205,56 +217,52 @@ void menu(int &opcion) {
     cout << "Especialidades (3)" << endl;
     cout << "Turnos (4)" << endl;
     cin >> opcion;
+  }
+
+  if (accion == 0 && opcion != 0)
+    opcion = 0;
+}
+void gestionPacientes(int &accion) {
+  switch (accion) {
+  case 1:
+    break;
+  case 2:
+    break;
+  case 3:
     break;
   }
-  if(accion == 0 && opcion != 0) opcion = 0;
 }
-void menuPacientes() {
-  int accion;
-  while (accion != 0) {
-    cout << "Gestión de Pacientes - Seleccione una acción" << endl;
-    cout << "Nuevo paciente (1)" << endl;
-    cout << "Buscar paciente (2)" << endl;
-    cout << "Listar pacientes (3)" << endl;
-    cout << "Volver (0)" << endl;
-    cin >> accion;
+
+void gestionMedicos(int &accion) {
+  switch (accion) {
+  case 1:
+    break;
+  case 2:
+    break;
+  case 3:
+    break;
+  case 4:
+    break;
   }
 }
 
-void menuMedicos() {
-  int accion;
-  while (accion != 0) {
-    cout << "Gestión de Médicos - Seleccione una acción" << endl;
-    cout << "Nuevo médico (1)" << endl;
-    cout << "Buscar médico (2)" << endl;
-    cout << "Listar médicos (3)" << endl;
-    cout << "Ver atenciones efectivas (4)" << endl;
-    cout << "Volver (0)" << endl;
-    cin >> accion;
+void gestionEspecialidades(int &accion) {
+  switch (accion) {
+  case 1:
+    break;
+  case 2:
+    break;
   }
 }
 
-void menuEspecialidades() {
-  int accion;
-  while (accion != 0) {
-    cout << "Gestión de Turnos - Seleccione una acción" << endl;
-    cout << "Listar especialidades (1)" << endl;
-    cout << "Buscar especialidad (2)" << endl;
-    cout << "Volver (0)" << endl;
-    cin >> accion;
-  }
-}
-
-void menuTurnos() {
-  int accion;
-  while (accion != 0) {
-    cout << "Gestión de Turnos - Seleccione una acción" << endl;
-    cout << "Nuevo turno (1)" << endl;
-    cout << "Actualizar turno (2)" << endl;
-    cout << "Turnos pendientes (3)" << endl;
-    cout << "Ver cancelaciones (4)" << endl;
-    cout << "Volver (0)" << endl;
-    cin >> accion;
+void gestionTurnos(int &accion) {
+  switch (accion) {
+  case 1:
+    break;
+  case 2:
+    break;
+  case 3:
+    break;
   }
 }
 
