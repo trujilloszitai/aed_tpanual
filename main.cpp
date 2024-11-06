@@ -62,11 +62,7 @@ struct nodoLT {
   nodoLT *sgte;
 };
 
-void menu(int &);
-void gestionPacientes(int &);
-void gestionMedicos(int &);
-void gestionEspecialidades(int &);
-void gestionTurnos(int &);
+int altaPaciente(nodoP *&);
 void pushPaciente(nodoP *&, Paciente);
 void pushMedico(nodoM *&, Medico);
 void pushTurno(nodoT *&, infoT);
@@ -97,12 +93,106 @@ int main() {
   // cargarArchivoMedicos(fMedicos, medicos);
   // cargarArchivoTurnos(fTurnos, turnos);
   int opcion = 0;
-  while (true)
-    menu(opcion);
+  while (true) {
+    int accion = -1;
+    if (opcion != 0) {
+      switch (opcion) {
+      case 1:
+        cout << "Gestión de Pacientes - Seleccione una acción" << endl;
+        cout << "Nuevo paciente (1)" << endl;
+        cout << "Buscar paciente (2)" << endl;
+        cout << "Listar pacientes (3)" << endl;
+        break;
+      case 2:
+        cout << "Gestión de Médicos - Seleccione una acción" << endl;
+        cout << "Nuevo médico (1)" << endl;
+        cout << "Buscar médico (2)" << endl;
+        cout << "Listar médicos (3)" << endl;
+        cout << "Ver atenciones efectivas (4)" << endl;
+        break;
+      case 3:
+        cout << "Gestión de Turnos - Seleccione una acción" << endl;
+        cout << "Listar especialidades (1)" << endl;
+        cout << "Buscar especialidad (2)" << endl;
+        break;
+      case 4:
+        cout << "Gestión de Turnos - Seleccione una acción" << endl;
+        cout << "Nuevo turno (1)" << endl;
+        cout << "Actualizar turno (2)" << endl;
+        cout << "Turnos pendientes (3)" << endl;
+        cout << "Ver cancelaciones (4)" << endl;
+        break;
+      }
+      cout << "Volver (0)" << endl;
+      cin >> accion;
+      if (accion != 0) {
+        switch (opcion) {
+        case 1:
+          // Pacientes
+          switch (accion) {
+          case 1:
+            break;
+          case 2:
+            break;
+          case 3:
+            break;
+          }
+          break;
+        case 2:
+          // Medicos
+          switch (accion) {
+          case 1:
+            break;
+          case 2:
+            break;
+          case 3:
+            break;
+          case 4:
+            break;
+          }
+          break;
+        case 3:
+          // Especialidades
+          switch (accion) {
+          case 1:
+            break;
+          case 2:
+            break;
+          }
+          break;
+        case 4:
+          // Turnos
+          switch (accion) {
+          case 1:
+            break;
+          case 2:
+            break;
+          case 3:
+            break;
+          }
+          break;
+        }
+        accion = 0;
+      }
+    } else {
+      cout << "Bienvenido al sistema de gestión de turnos de la clínica "
+           << "\"Clínica Genial\"" << endl;
+      cout << "Menú principal - Seleccione una opción" << endl;
+      cout << "Pacientes (1)" << endl;
+      cout << "Médicos (2)" << endl;
+      cout << "Especialidades (3)" << endl;
+      cout << "Turnos (4)" << endl;
+      cin >> opcion;
+    }
+
+    if (accion == 0 && opcion != 0)
+      opcion = 0;
+  }
 
   return 0;
 }
 
+// ARCHIVOS
 nodoP *leerArchivoPacientes(FILE *f) {
   Paciente p;
   nodoP *lista = NULL;
@@ -160,113 +250,59 @@ void cargarArchivoTurnos(FILE *f, infoT turnos[]) {
   }
   fclose(f);
 }
-void menu(int &opcion) {
-  int accion = -1;
-  if (opcion != 0) {
-    switch (opcion) {
-    case 1:
-      cout << "Gestión de Pacientes - Seleccione una acción" << endl;
-      cout << "Nuevo paciente (1)" << endl;
-      cout << "Buscar paciente (2)" << endl;
-      cout << "Listar pacientes (3)" << endl;
-      break;
-    case 2:
-      cout << "Gestión de Médicos - Seleccione una acción" << endl;
-      cout << "Nuevo médico (1)" << endl;
-      cout << "Buscar médico (2)" << endl;
-      cout << "Listar médicos (3)" << endl;
-      cout << "Ver atenciones efectivas (4)" << endl;
-      break;
-    case 3:
-      cout << "Gestión de Turnos - Seleccione una acción" << endl;
-      cout << "Listar especialidades (1)" << endl;
-      cout << "Buscar especialidad (2)" << endl;
-      break;
-    case 4:
-      cout << "Gestión de Turnos - Seleccione una acción" << endl;
-      cout << "Nuevo turno (1)" << endl;
-      cout << "Actualizar turno (2)" << endl;
-      cout << "Turnos pendientes (3)" << endl;
-      cout << "Ver cancelaciones (4)" << endl;
-      break;
-    }
-    cout << "Volver (0)" << endl;
-    cin >> accion;
-    if (accion != 0) {
-      switch (opcion) {
-      case 1:
-        gestionPacientes(accion);
-        break;
-      case 2:
-        gestionMedicos(accion);
-        break;
-      case 3:
-        gestionEspecialidades(accion);
-        break;
-      case 4:
-        gestionTurnos(accion);
-        break;
-      }
-    }
-  } else {
-    cout << "Bienvenido al sistema de gestión de turnos de la clínica "
-         << "\"Clínica Genial\"" << endl;
-    cout << "Menú principal - Seleccione una opción" << endl;
-    cout << "Pacientes (1)" << endl;
-    cout << "Médicos (2)" << endl;
-    cout << "Especialidades (3)" << endl;
-    cout << "Turnos (4)" << endl;
-    cin >> opcion;
-  }
-
-  if (accion == 0 && opcion != 0)
-    opcion = 0;
+int cantRegPacientes(FILE *&f) {
+  // preservar la posicion actual
+  int posActual = ftell(f);
+  fseek(f, 0, SEEK_END);
+  int desplaz = ftell(f);
+  int cantidad = desplaz / sizeof(Paciente);
+  // vuelvo el puntero a donde estaba
+  fseek(f, posActual, SEEK_SET);
+  return cantidad;
 }
-void gestionPacientes(int &accion) {
-  switch (accion) {
-  case 1:
-    break;
-  case 2:
-    break;
-  case 3:
-    break;
-  }
+int cantRegMedicos(FILE *&f) {
+  // preservar la posicion actual
+  int posActual = ftell(f);
+  fseek(f, 0, SEEK_END);
+  int desplaz = ftell(f);
+  int cantidad = desplaz / sizeof(Medico);
+  // vuelvo el puntero a donde estaba
+  fseek(f, posActual, SEEK_SET);
+  return cantidad;
+}
+int cantRegTurnos(FILE *&f) {
+  // preservar la posicion actual
+  int posActual = ftell(f);
+  fseek(f, 0, SEEK_END);
+  int desplaz = ftell(f);
+  int cantidad = desplaz / sizeof(infoT);
+  // vuelvo el puntero a donde estaba
+  fseek(f, posActual, SEEK_SET);
+  return cantidad;
 }
 
-void gestionMedicos(int &accion) {
-  switch (accion) {
-  case 1:
-    break;
-  case 2:
-    break;
-  case 3:
-    break;
-  case 4:
-    break;
-  }
+// FUNCIONALIDADES
+int altaPaciente(nodoP *&lista) {
+  Paciente nuevoPaciente;
+  FILE *f = fopen("pacientes.bin", "rb+");
+  int id = cantRegPacientes(f) + 1;
+  cout << "Nuevo paciente (" << id << ")" << endl;
+  cout << "Nombre: ";
+  cin >> nuevoPaciente.nombre;
+  cout << "Apellido: ";
+  cin >> nuevoPaciente.apellido;
+  cout << "Edad: ";
+  cin >> nuevoPaciente.edad;
+  cout << "DNI: ";
+  cin >> nuevoPaciente.dni;
+  cout << "Teléfono: ";
+  cin >> nuevoPaciente.telefono;
+  pushPaciente(lista, nuevoPaciente);
+  fseek(f, id * sizeof(Paciente), SEEK_SET);
+  fwrite(&nuevoPaciente, sizeof(Paciente), 1, f);
+  fclose(f);
+  return id;
 }
-
-void gestionEspecialidades(int &accion) {
-  switch (accion) {
-  case 1:
-    break;
-  case 2:
-    break;
-  }
-}
-
-void gestionTurnos(int &accion) {
-  switch (accion) {
-  case 1:
-    break;
-  case 2:
-    break;
-  case 3:
-    break;
-  }
-}
-
-int altaPaciente(nodoP *&lista) {}
 
 int altaTurno(nodoT *&lista) {}
 
