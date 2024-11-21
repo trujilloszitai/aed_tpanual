@@ -63,11 +63,6 @@ struct nodoLT {
   nodoLT *sgte;
 };
 
-nodoLM * ListaMed = NULL;
-nodoLP * ListaPac = NULL;
-nodoLT * ListaDeListasT = NULL;
-nodoT * ListaT = NULL;
-
 void altaPaciente(nodoLP *&);
 void pushPaciente(nodoLP *&, Paciente);
 void pushMedico(nodoLM *&, Medico);
@@ -91,13 +86,14 @@ int main() {
   // cargarArchivoPacientes(fPacientes, pacientes);
   // cargarArchivoMedicos(fMedicos, medicos);
   // cargarArchivoTurnos(fTurnos, turnos);
- FILE *fPacientes = fopen("pacientes.bin", "rb");
- FILE *fMedicos = fopen("medicos.bin", "rb");
- FILE *fTurnos = fopen("turnos.bin", "rb");
 
-nodoLM * ListaDeM = leerArchivoMedicos(fMedicos);
-nodoLP * ListaDeP = leerArchivoPacientes(fPacientes);
-nodoLT * ListaDeListasT = leerArchivoTurnos(fTurnos);
+//  FILE *fPacientes = fopen("pacientes.bin", "rb");
+//  FILE *fMedicos = fopen("medicos.bin", "rb");
+//  FILE *fTurnos = fopen("turnos.bin", "rb");
+
+// nodoLM * ListaDeM = leerArchivoMedicos(fMedicos);
+// nodoLP * ListaDeP = leerArchivoPacientes(fPacientes);
+// nodoLT * ListaDeListasT = leerArchivoTurnos(fTurnos);
 
   int opcion = 0;
   while (true) {
@@ -138,7 +134,7 @@ nodoLT * ListaDeListasT = leerArchivoTurnos(fTurnos);
           // Pacientes
           switch (accion) {
           case 1:
-          altaPaciente(ListaDeP);
+          // altaPaciente(ListaDeP);
             break;
           case 2:
             break;
@@ -298,7 +294,7 @@ void altaPaciente(nodoLP *&lista) {
   fclose(f);
 }
 
-int altaTurno(nodoT *&lista) {
+void altaTurno(nodoT *&lista) {
     int opcion;
     cout << "Turnos - Alta de Turno" << endl;
     while(opcion != 1 && opcion != 2) {
@@ -312,9 +308,9 @@ int altaTurno(nodoT *&lista) {
 
 }
 
-int altaMedico(nodoLM *&lista) {}
+void altaMedico(nodoLM *&lista) {}
 
-int actualizarEstatus(nodoLM *listaM, nodoT *&listaT, int idMedico) {}
+void actualizarEstatus(nodoLM *listaM, nodoT *&listaT, int idMedico) {}
 
 void turnosPendientes(nodoLM *listaM, nodoT *&listaT, int idMedico, int mes) {}
 
