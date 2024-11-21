@@ -87,13 +87,13 @@ int main() {
   // cargarArchivoMedicos(fMedicos, medicos);
   // cargarArchivoTurnos(fTurnos, turnos);
 
-//  FILE *fPacientes = fopen("pacientes.bin", "rb");
-//  FILE *fMedicos = fopen("medicos.bin", "rb");
-//  FILE *fTurnos = fopen("turnos.bin", "rb");
+  FILE *fPacientes = fopen("pacientes.bin", "rb");
+  FILE *fMedicos = fopen("medicos.bin", "rb");
+  FILE *fTurnos = fopen("turnos.bin", "rb");
 
-// nodoLM * ListaDeM = leerArchivoMedicos(fMedicos);
-// nodoLP * ListaDeP = leerArchivoPacientes(fPacientes);
-// nodoLT * ListaDeListasT = leerArchivoTurnos(fTurnos);
+ nodoLM * ListaDeM = leerArchivoMedicos(fMedicos);
+ nodoLP * ListaDeP = leerArchivoPacientes(fPacientes);
+ nodoLT * ListaDeListasT = leerArchivoTurnos(fTurnos);
 
   int opcion = 0;
   while (true) {
