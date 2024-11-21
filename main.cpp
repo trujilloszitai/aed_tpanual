@@ -63,20 +63,22 @@ struct nodoLT {
   nodoLT *sgte;
 };
 
-int altaPaciente(nodoP *&);
+nodoM * ListaMed = NULL;
+nodoP * ListaPac = NULL;
+nodoLT * ListaDeListasT = NULL;
+nodoT * ListaT = NULL;
+
+void altaPaciente(nodoP *&);
 void pushPaciente(nodoP *&, Paciente);
 void pushMedico(nodoM *&, Medico);
-void pushTurno(nodoT *&, infoT);
-void pushListaTurno(nodoLT *&, nodoT *);
+void pushTurno(nodoT *&, Turno);
+void pushListaTurno(nodoLT *&, infoT);
 nodoP *leerArchivoPacientes(FILE *);
 nodoM *leerArchivoMedicos(FILE *);
 nodoLT *leerArchivoTurnos(FILE *);
 void cargarArchivoPacientes(FILE *, Paciente[]);
 void cargarArchivoMedicos(FILE *, Medico[]);
 void cargarArchivoTurnos(FILE *, infoT[]);
-void generarPacientes(Paciente[], int);
-void generarMedicos(Medico[], int);
-void generarTurnos(infoT[], int);
 
 int main() {
   // Paciente pacientes[100] = {};
@@ -86,13 +88,17 @@ int main() {
   // generarPacientes(pacientes, 100);
   // generarMedicos(medicos, 35);
   // generarTurnos(turnos, 100);
-
-  // FILE *fPacientes = fopen("pacientes.bin", "wb");
-  // FILE *fMedicos = fopen("medicos.bin", "wb");
-  // FILE *fTurnos = fopen("turnos.bin", "wb");
   // cargarArchivoPacientes(fPacientes, pacientes);
   // cargarArchivoMedicos(fMedicos, medicos);
   // cargarArchivoTurnos(fTurnos, turnos);
+ FILE *fPacientes = fopen("pacientes.bin", "rb");
+ FILE *fMedicos = fopen("medicos.bin", "rb");
+ FILE *fTurnos = fopen("turnos.bin", "rb");
+
+nodoM * ListaDeM = leerArchivoMedicos(fMedicos);
+nodoP * ListaDeP = leerArchivoPacientes(fPacientes);
+nodoLT * ListaDeListasT = leerArchivoTurnos(fTurnos);
+
   int opcion = 0;
   while (true) {
     int accion = -1;
@@ -132,6 +138,7 @@ int main() {
           // Pacientes
           switch (accion) {
           case 1:
+          altaPaciente(ListaDeP);
             break;
           case 2:
             break;
@@ -219,31 +226,18 @@ nodoLT *leerArchivoTurnos(FILE *f) {
   nodoT *ls = NULL;
   int ultimoIdMedico = 1;
   while (fread(&i, sizeof(infoT), 1, f)) {
-    t = i.turno;
+    t = i.sublista->info;
     if (i.idMedico == ultimoIdMedico) {
-      pushTurno(ls, i);
+      pushTurno(ls, t);
     } else {
       ultimoIdMedico = i.idMedico;
-      pushListaTurno(lp, ls);
+      pushListaTurno(lp, i);
       ls = NULL;
     }
   }
   return lp;
 }
-void cargarArchivoPacientes(FILE *f, Paciente pacientes[]) {
-  for (int i = 0; i < 100; i++) {
-    Paciente p = pacientes[i];
-    fwrite(&p, sizeof(Paciente), 1, f);
-  }
-  fclose(f);
-}
-void cargarArchivoMedicos(FILE *f, Medico medicos[]) {
-  for (int i = 0; i < 100; i++) {
-    Medico m = medicos[i];
-    fwrite(&m, sizeof(Medico), 1, f);
-  }
-  fclose(f);
-}
+
 void cargarArchivoTurnos(FILE *f, infoT turnos[]) {
   for (int i = 0; i < 100; i++) {
     infoT t = turnos[i];
@@ -283,7 +277,7 @@ int cantRegTurnos(FILE *&f) {
 }
 
 // FUNCIONALIDADES
-int altaPaciente(nodoP *&lista) {
+void altaPaciente(nodoP *&lista) {
   Paciente nuevoPaciente;
   FILE *f = fopen("pacientes.bin", "rb+");
   int id = cantRegPacientes(f) + 1;
@@ -302,14 +296,13 @@ int altaPaciente(nodoP *&lista) {
   fseek(f, id * sizeof(Paciente), SEEK_SET);
   fwrite(&nuevoPaciente, sizeof(Paciente), 1, f);
   fclose(f);
-  return id;
 }
 
-int altaTurno(nodoT *&lista) {}
+void altaTurno(nodoT *&lista) {}
 
-int altaMedico(nodoM *&lista) {}
+void altaMedico(nodoM *&lista) {} 
 
-int actualizarEstatus(nodoM *listaM, nodoT *&listaT, int idMedico) {}
+void actualizarEstatus(nodoM *listaM, nodoT *&listaT, int idMedico) {}
 
 void turnosPendientes(nodoM *listaM, nodoT *&listaT, int idMedico, int mes) {}
 
@@ -331,13 +324,13 @@ void pushMedico(nodoM *&lista, Medico info) {
   m->sgte = lista;
   lista = m;
 }
-void pushTurno(nodoT *&lista, infoT info) {
+void pushTurno(nodoT *&lista, Turno info) {
   nodoT *t = new nodoT();
   t->info = info;
   t->sgte = lista;
   lista = t;
 }
-void pushListaTurno(nodoLT *&lista, nodoT *info) {
+void pushListaTurno(nodoLT *&lista, infoT info) {
   nodoLT *lt = new nodoLT();
   lt->info = info;
   lt->sgte = lista;
