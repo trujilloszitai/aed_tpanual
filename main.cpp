@@ -66,8 +66,8 @@ struct nodoLT {
 int altaPaciente(nodoLP *&);
 void pushPaciente(nodoLP *&, Paciente);
 void pushMedico(nodoLM *&, Medico);
-void pushTurno(nodoT *&, infoT);
-void pushListaTurno(nodoLT *&, nodoT *);
+void pushTurno(nodoT *&, Turno);
+void pushListaTurno(nodoLT *&, infoT);
 nodoLP *leerArchivoPacientes(FILE *);
 nodoLM *leerArchivoMedicos(FILE *);
 nodoLT *leerArchivoTurnos(FILE *);
@@ -218,10 +218,10 @@ nodoLT *leerArchivoTurnos(FILE *f) {
   while (fread(&i, sizeof(infoT), 1, f)) {
     t = i.sublista->info;
     if (i.idMedico == ultimoIdMedico) {
-      pushTurno(ls, i);
+      pushTurno(ls, t);
     } else {
       ultimoIdMedico = i.idMedico;
-      pushListaTurno(lp, ls);
+      pushListaTurno(lp, i);
       ls = NULL;
     }
   }
@@ -302,7 +302,19 @@ int altaPaciente(nodoLP *&lista) {
   return id;
 }
 
-int altaTurno(nodoT *&lista) {}
+int altaTurno(nodoT *&lista) {
+    int opcion;
+    cout << "Turnos - Alta de Turno" << endl;
+    while(opcion != 1 && opcion != 2) {
+        cout << "¿El solicitante ya es paciente de la clínica?" << endl;
+        cout << "Sí (1)" << endl;
+        cout << "No (2)" << endl;
+    }
+    if (opcion == 0) {
+
+    }
+
+}
 
 int altaMedico(nodoLM *&lista) {}
 
@@ -328,13 +340,13 @@ void pushMedico(nodoLM *&lista, Medico info) {
   m->sgte = lista;
   lista = m;
 }
-void pushTurno(nodoT *&lista, infoT info) {
+void pushTurno(nodoT *&lista, Turno info) {
   nodoT *t = new nodoT();
   t->info = info;
   t->sgte = lista;
   lista = t;
 }
-void pushListaTurno(nodoLT *&lista, nodoT *info) {
+void pushListaTurno(nodoLT *&lista, infoT info) {
   nodoLT *lt = new nodoLT();
   lt->info = info;
   lt->sgte = lista;
