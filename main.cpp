@@ -36,46 +36,44 @@ struct Turno {
   char estatus = 'P';
   int idPaciente = 0;
 };
-struct infoT {
-  int idMedico;
-  Turno turno;
-};
 
 // Estructuras - Nodos
 struct nodoLP {
   Paciente info;
-  nodoP *sgte;
+  nodoLP *sgte;
 };
 
 struct nodoLM {
   Medico info;
-  nodoM *sgte;
+  nodoLM *sgte;
 };
 
 struct nodoT {
-  infoT info;
+Turno info;
   nodoT *sgte;
 };
 
+struct infoT {
+  int idMedico;
+  nodoT * sublista;
+};
+
 struct nodoLT {
-  nodoT *info;
+  infoT info;
   nodoLT *sgte;
 };
 
-int altaPaciente(nodoP *&);
-void pushPaciente(nodoP *&, Paciente);
-void pushMedico(nodoM *&, Medico);
+int altaPaciente(nodoLP *&);
+void pushPaciente(nodoLP *&, Paciente);
+void pushMedico(nodoLM *&, Medico);
 void pushTurno(nodoT *&, infoT);
 void pushListaTurno(nodoLT *&, nodoT *);
-nodoP *leerArchivoPacientes(FILE *);
-nodoM *leerArchivoMedicos(FILE *);
+nodoLP *leerArchivoPacientes(FILE *);
+nodoLM *leerArchivoMedicos(FILE *);
 nodoLT *leerArchivoTurnos(FILE *);
 void cargarArchivoPacientes(FILE *, Paciente[]);
 void cargarArchivoMedicos(FILE *, Medico[]);
 void cargarArchivoTurnos(FILE *, infoT[]);
-void generarPacientes(Paciente[], int);
-void generarMedicos(Medico[], int);
-void generarTurnos(infoT[], int);
 
 int main() {
   // Paciente pacientes[100] = {};
@@ -193,18 +191,18 @@ int main() {
 }
 
 // ARCHIVOS
-nodoP *leerArchivoPacientes(FILE *f) {
+nodoLP *leerArchivoPacientes(FILE *f) {
   Paciente p;
-  nodoP *lista = NULL;
+  nodoLP *lista = NULL;
   while (fread(&p, sizeof(Paciente), 1, f)) {
     pushPaciente(lista, p);
   }
   return lista;
 }
 
-nodoM *leerArchivoMedicos(FILE *f) {
+nodoLM *leerArchivoMedicos(FILE *f) {
   Medico m;
-  nodoM *lista = NULL;
+  nodoLM *lista = NULL;
   while (fread(&m, sizeof(Medico), 1, f)) {
     pushMedico(lista, m);
   }
@@ -218,7 +216,7 @@ nodoLT *leerArchivoTurnos(FILE *f) {
   nodoT *ls = NULL;
   int ultimoIdMedico = 1;
   while (fread(&i, sizeof(infoT), 1, f)) {
-    t = i.turno;
+    t = i.sublista->info;
     if (i.idMedico == ultimoIdMedico) {
       pushTurno(ls, i);
     } else {
@@ -282,7 +280,7 @@ int cantRegTurnos(FILE *&f) {
 }
 
 // FUNCIONALIDADES
-int altaPaciente(nodoP *&lista) {
+int altaPaciente(nodoLP *&lista) {
   Paciente nuevoPaciente;
   FILE *f = fopen("pacientes.bin", "rb+");
   int id = cantRegPacientes(f) + 1;
@@ -306,26 +304,26 @@ int altaPaciente(nodoP *&lista) {
 
 int altaTurno(nodoT *&lista) {}
 
-int altaMedico(nodoM *&lista) {}
+int altaMedico(nodoLM *&lista) {}
 
-int actualizarEstatus(nodoM *listaM, nodoT *&listaT, int idMedico) {}
+int actualizarEstatus(nodoLM *listaM, nodoT *&listaT, int idMedico) {}
 
-void turnosPendientes(nodoM *listaM, nodoT *&listaT, int idMedico, int mes) {}
+void turnosPendientes(nodoLM *listaM, nodoT *&listaT, int idMedico, int mes) {}
 
-void atencionesEfectivas(nodoM *listaM, nodoT *&listaT, int mes) {}
+void atencionesEfectivas(nodoLM *listaM, nodoT *&listaT, int mes) {}
 
-void cancelacionesPorMes(nodoM *listaM, nodoT *&listaT, nodoP *&listaP,
+void cancelacionesPorMes(nodoLM *listaM, nodoT *&listaT, nodoLP *&listaP,
                          int mes) {}
 
 // FUNCIONES DE NODOS
-void pushPaciente(nodoP *&lista, Paciente info) {
-  nodoP *p = new nodoP();
+void pushPaciente(nodoLP *&lista, Paciente info) {
+  nodoLP *p = new nodoLP();
   p->info = info;
   p->sgte = lista;
   lista = p;
 }
-void pushMedico(nodoM *&lista, Medico info) {
-  nodoM *m = new nodoM();
+void pushMedico(nodoLM *&lista, Medico info) {
+  nodoLM *m = new nodoLM();
   m->info = info;
   m->sgte = lista;
   lista = m;
@@ -342,23 +340,3 @@ void pushListaTurno(nodoLT *&lista, nodoT *info) {
   lt->sgte = lista;
   lista = lt;
 }
-
-// GENERACIÓN DE DATOS
-// Función para generar un número de identificación (DNI) de 8 cifras
-
-
-// Función para generar un número de teléfono aleatorio
-
-
-// Función para generar un array de pacientes
-
-
-    // Horario de atención: inicio y fin en rangos enteros o .5
-    //medicos[i].rangoHorario[0] = horaInicio + minInicio;
-
-   // int horaFin = horaInicio + 6; // Fin de horario: 4 horas más que inicio
-   // float minFin = minInicio;
-    //medicos[i].rangoHorario[1] = horaFin + minFin;
-
-    //medicos[i].tiempoDeConsulta =
-
