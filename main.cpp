@@ -25,7 +25,7 @@ struct Medico {
 
 struct Especialidad {
   int id = 0;
-  char descripción[50 + 1] = "";
+  char descripcion[50 + 1] = "";
 };
 
 struct Turno {
@@ -98,25 +98,25 @@ int main() {
     if (opcion != 0) {
       switch (opcion) {
       case 1:
-        cout << "Gestión de Pacientes - Seleccione una acción" << endl;
+        cout << "Gestion de Pacientes - Seleccione una accion" << endl;
         cout << "Nuevo paciente (1)" << endl;
         cout << "Buscar paciente (2)" << endl;
         cout << "Listar pacientes (3)" << endl;
         break;
       case 2:
-        cout << "Gestión de Médicos - Seleccione una acción" << endl;
-        cout << "Nuevo médico (1)" << endl;
-        cout << "Buscar médico (2)" << endl;
-        cout << "Listar médicos (3)" << endl;
+        cout << "Gestion de Medicos - Seleccione una accion" << endl;
+        cout << "Nuevo medico (1)" << endl;
+        cout << "Buscar medico (2)" << endl;
+        cout << "Listar medicos (3)" << endl;
         cout << "Ver atenciones efectivas (4)" << endl;
         break;
       case 3:
-        cout << "Gestión de Turnos - Seleccione una acción" << endl;
+        cout << "Gestion de Turnos - Seleccione una accion" << endl;
         cout << "Listar especialidades (1)" << endl;
         cout << "Buscar especialidad (2)" << endl;
         break;
       case 4:
-        cout << "Gestión de Turnos - Seleccione una acción" << endl;
+        cout << "Gestion de Turnos - Seleccione una accion" << endl;
         cout << "Nuevo turno (1)" << endl;
         cout << "Actualizar turno (2)" << endl;
         cout << "Turnos pendientes (3)" << endl;
@@ -175,11 +175,11 @@ int main() {
         accion = 0;
       }
     } else {
-      cout << "Bienvenido al sistema de gestión de turnos de la clínica "
-           << "\"Clínica Genial\"" << endl;
-      cout << "Menú principal - Seleccione una opción" << endl;
+      cout << "Bienvenido al sistema de gestion de turnos de la clinica "
+           << "\"Clinica Genial\"" << endl;
+      cout << "Menu principal - Seleccione una opcion" << endl;
       cout << "Pacientes (1)" << endl;
-      cout << "Médicos (2)" << endl;
+      cout << "Medicos (2)" << endl;
       cout << "Especialidades (3)" << endl;
       cout << "Turnos (4)" << endl;
       cin >> opcion;
@@ -295,7 +295,7 @@ int altaPaciente(nodoP *&lista) {
   cin >> nuevoPaciente.edad;
   cout << "DNI: ";
   cin >> nuevoPaciente.dni;
-  cout << "Teléfono: ";
+  cout << "Telefono: ";
   cin >> nuevoPaciente.telefono;
   pushPaciente(lista, nuevoPaciente);
   fseek(f, id * sizeof(Paciente), SEEK_SET);
@@ -345,86 +345,20 @@ void pushListaTurno(nodoLT *&lista, nodoT *info) {
 
 // GENERACIÓN DE DATOS
 // Función para generar un número de identificación (DNI) de 8 cifras
-void generarDNI(char *dni) {
-  int numDNI = 1 + rand() % 90000000;
-  snprintf(dni, 9, "%08d",
-           numDNI); // Convertir el número en una cadena de 8 caracteres
-}
+
 
 // Función para generar un número de teléfono aleatorio
-void generarTelefono(char *telefono) {
-  snprintf(telefono, 21, "+54 9 %02d-%04d-%04d", rand() % 100, rand() % 10000,
-           rand() % 10000);
-}
+
 
 // Función para generar un array de pacientes
-void generarPacientes(Paciente pacientes[], int N) {
-  const char *nombres[] = {"Juan",  "Ana",  "Pedro", "Lucia",  "Carlos",
-                           "Maria", "Luis", "Elena", "Miguel", "Laura"};
-  const char *apellidos[] = {"Perez", "Gomez",    "Fernandez", "Rodriguez",
-                             "Luna",  "Martinez", "Sanchez",   "Diaz",
-                             "Silva", "Morales"};
-  int numNombres = sizeof(nombres) / sizeof(nombres[0]);
-  int numApellidos = sizeof(apellidos) / sizeof(apellidos[0]);
 
-  for (int i = 0; i < N; i++) {
-    pacientes[i].id = i + 1; // Asignar un ID secuencial al paciente
-    strncpy(pacientes[i].nombre, nombres[rand() % numNombres], 50);
-    strncpy(pacientes[i].apellido, apellidos[rand() % numApellidos], 50);
-    pacientes[i].edad = 18 + rand() % 83;   // Edad entre 18 y 100 años
-    generarDNI(pacientes[i].dni);           // Generar DNI de 8 cifras
-    generarTelefono(pacientes[i].telefono); // Generar número de teléfono
-  }
-}
-void generarMedicos(Medico medicos[], int N) {
-  for (int i = 0; i < N; i++) {
-    medicos[i].id = i + 1;
-    snprintf(medicos[i].nombre, sizeof(medicos[i].nombre), "Nombre%d", i + 1);
-    snprintf(medicos[i].apellido, sizeof(medicos[i].apellido), "Apellido%d",
-             i + 1);
-    medicos[i].matricula = 10000 + rand() % 90000; // Matricula de 5 a 6 cifras
-    medicos[i].idEspecialidad = 1 + rand() % 20;   // Especialidad entre 1 y 20
-
-    // Asignación de días de atención
-    for (int j = 0; j < 7; j++) {
-      medicos[i].diasDeAtencion[j] = rand() % 2; // 1 si atiende el día, 0 si no
-    }
 
     // Horario de atención: inicio y fin en rangos enteros o .5
-    int horaInicio = 8 + rand() % 5; // entre 8 y 12
-    float minInicio = (rand() % 2) == 0 ? 0.0 : 0.5;
-    medicos[i].rangoHorario[0] = horaInicio + minInicio;
+    //medicos[i].rangoHorario[0] = horaInicio + minInicio;
 
-    int horaFin = horaInicio + 6; // Fin de horario: 4 horas más que inicio
-    float minFin = minInicio;
-    medicos[i].rangoHorario[1] = horaFin + minFin;
+   // int horaFin = horaInicio + 6; // Fin de horario: 4 horas más que inicio
+   // float minFin = minInicio;
+    //medicos[i].rangoHorario[1] = horaFin + minFin;
 
-    medicos[i].tiempoDeConsulta =
-        15 + (rand() % 4) * 5; // entre 15, 20, 25 o 30 minutos
-  }
-}
-void generarTurnos(infoT turnos[], int N) {
-  srand(time(0)); // Semilla para números aleatorios
+    //medicos[i].tiempoDeConsulta =
 
-  for (int i = 0; i < N; i++) {
-    infoT nuevoTurno;
-    nuevoTurno.idMedico = 1 + rand() % 35; // ID del médico entre 1 y 35
-    nuevoTurno.turno.id = i + 1;           // ID secuencial para el turno
-    // Genera una hora aleatoria en formato 24 horas con intervalos de 15
-    // minutos
-    int horaBase = 8 + rand() % 10;  // Hora base entre 8 y 17
-    float min = (rand() % 4) * 0.25; // Minuto en .0, .25, .50 o .75
-    nuevoTurno.turno.hora = horaBase + min;
-    nuevoTurno.turno.dia = 1 + rand() % 30; // Día entre 1 y 30
-    nuevoTurno.turno.mes = 1 + rand() % 12; // Mes entre 1 y 12
-
-    // Asignación aleatoria de estatus
-    char estatuses[] = {'P', 'A', 'C'};
-    nuevoTurno.turno.estatus = estatuses[rand() % 3];
-
-    nuevoTurno.turno.idPaciente =
-        1 + rand() % 100; // ID del paciente entre 1 y 100
-
-    turnos[i] = nuevoTurno; // Añadir el turno al vector
-  }
-}
