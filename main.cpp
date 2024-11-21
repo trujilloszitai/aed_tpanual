@@ -36,10 +36,6 @@ struct Turno {
   char estatus = 'P';
   int idPaciente = 0;
 };
-struct infoT {
-  int idMedico;
-  Turno turno;
-};
 
 // Estructuras - Nodos
 struct nodoP {
@@ -53,12 +49,17 @@ struct nodoM {
 };
 
 struct nodoT {
-  infoT info;
+Turno info;
   nodoT *sgte;
 };
 
+struct infoT {
+  int idMedico;
+  nodoT * sublista;
+};
+
 struct nodoLT {
-  nodoT *info;
+  infoT info;
   nodoLT *sgte;
 };
 
@@ -361,4 +362,3 @@ void pushListaTurno(nodoLT *&lista, nodoT *info) {
     //medicos[i].rangoHorario[1] = horaFin + minFin;
 
     //medicos[i].tiempoDeConsulta =
-
