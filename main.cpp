@@ -63,7 +63,12 @@ struct nodoLT {
   nodoLT *sgte;
 };
 
-int altaPaciente(nodoLP *&);
+nodoLM * ListaMed = NULL;
+nodoLP * ListaPac = NULL;
+nodoLT * ListaDeListasT = NULL;
+nodoT * ListaT = NULL;
+
+void altaPaciente(nodoLP *&);
 void pushPaciente(nodoLP *&, Paciente);
 void pushMedico(nodoLM *&, Medico);
 void pushTurno(nodoT *&, Turno);
@@ -83,13 +88,17 @@ int main() {
   // generarPacientes(pacientes, 100);
   // generarMedicos(medicos, 35);
   // generarTurnos(turnos, 100);
-
-  // FILE *fPacientes = fopen("pacientes.bin", "wb");
-  // FILE *fMedicos = fopen("medicos.bin", "wb");
-  // FILE *fTurnos = fopen("turnos.bin", "wb");
   // cargarArchivoPacientes(fPacientes, pacientes);
   // cargarArchivoMedicos(fMedicos, medicos);
   // cargarArchivoTurnos(fTurnos, turnos);
+ FILE *fPacientes = fopen("pacientes.bin", "rb");
+ FILE *fMedicos = fopen("medicos.bin", "rb");
+ FILE *fTurnos = fopen("turnos.bin", "rb");
+
+nodoLM * ListaDeM = leerArchivoMedicos(fMedicos);
+nodoLP * ListaDeP = leerArchivoPacientes(fPacientes);
+nodoLT * ListaDeListasT = leerArchivoTurnos(fTurnos);
+
   int opcion = 0;
   while (true) {
     int accion = -1;
@@ -129,6 +138,7 @@ int main() {
           // Pacientes
           switch (accion) {
           case 1:
+          altaPaciente(ListaDeP);
             break;
           case 2:
             break;
@@ -227,20 +237,7 @@ nodoLT *leerArchivoTurnos(FILE *f) {
   }
   return lp;
 }
-void cargarArchivoPacientes(FILE *f, Paciente pacientes[]) {
-  for (int i = 0; i < 100; i++) {
-    Paciente p = pacientes[i];
-    fwrite(&p, sizeof(Paciente), 1, f);
-  }
-  fclose(f);
-}
-void cargarArchivoMedicos(FILE *f, Medico medicos[]) {
-  for (int i = 0; i < 100; i++) {
-    Medico m = medicos[i];
-    fwrite(&m, sizeof(Medico), 1, f);
-  }
-  fclose(f);
-}
+
 void cargarArchivoTurnos(FILE *f, infoT turnos[]) {
   for (int i = 0; i < 100; i++) {
     infoT t = turnos[i];
@@ -280,7 +277,7 @@ int cantRegTurnos(FILE *&f) {
 }
 
 // FUNCIONALIDADES
-int altaPaciente(nodoLP *&lista) {
+void altaPaciente(nodoLP *&lista) {
   Paciente nuevoPaciente;
   FILE *f = fopen("pacientes.bin", "rb+");
   int id = cantRegPacientes(f) + 1;
@@ -299,7 +296,6 @@ int altaPaciente(nodoLP *&lista) {
   fseek(f, id * sizeof(Paciente), SEEK_SET);
   fwrite(&nuevoPaciente, sizeof(Paciente), 1, f);
   fclose(f);
-  return id;
 }
 
 int altaTurno(nodoT *&lista) {
