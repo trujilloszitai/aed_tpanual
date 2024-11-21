@@ -42,12 +42,12 @@ struct infoT {
 };
 
 // Estructuras - Nodos
-struct nodoP {
+struct nodoLP {
   Paciente info;
   nodoP *sgte;
 };
 
-struct nodoM {
+struct nodoLM {
   Medico info;
   nodoM *sgte;
 };
