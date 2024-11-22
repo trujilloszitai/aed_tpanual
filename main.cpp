@@ -65,7 +65,7 @@ struct nodoLT {
 
 void altaPaciente(nodoLP *&);
 void pushPaciente(nodoLP *&, Paciente);
-void altaMedico(nodoLM *&);
+void altaMedico(nodoLM *&, char[][50+1]);
 void pushMedico(nodoLM *&, Medico);
 void pushTurno(nodoT *&, Turno);
 void pushListaTurno(nodoLT *&, infoT);
@@ -151,7 +151,7 @@ int main() {
           // Medicos
           switch (accion) {
           case 1:
-          altaMedico(ListaDeM);
+          altaMedico(ListaDeM, especialidades);
             break;
           case 2:
             break;
@@ -298,7 +298,7 @@ int elegirEspecialidad(char especialidades[][50 + 1]) {
   int i, idEspecialidad;
   i = idEspecialidad = 0;
   cout << "Especialidades disponibles" << endl;
-  for (i; i < 5; i++) {
+  for (; i < 5; i++) {
     cout << especialidades[i] << " (" << i + 1 << ") | ";
     cout << especialidades[i + 5] << " (" << i + 5 + 1 << ") | ";
     cout << especialidades[i + 10] << " (" << i + 10 + 1 << ") | ";
@@ -313,7 +313,7 @@ int elegirEspecialidad(char especialidades[][50 + 1]) {
   return idEspecialidad;
 }
 
-void altaMedico(nodoLM *&lista){
+void altaMedico(nodoLM *&lista, char especialidades[][50+1]){
 Medico newMed;
 FILE * f = fopen("medicos.bin", "rb+");
 int id = cantRegMedicos(f) + 1;
@@ -324,28 +324,7 @@ cout << "Apellido: ";
 cin >> newMed.apellido;
 cout << "Numero de matricula: " << endl;
 cin >> newMed.matricula;
-cout << "Elija 1 especialidad: " << endl;
-cout<< "Cardiologia (1)"<<endl;
-cout<< "Pediatria (2)"<<endl;
-cout<< "Ginecologia (3)"<<endl;
-cout<< "Dermatologia (4)"<<endl;
-cout<< "Neurologia (5)"<<endl;
-cout<< "Oftalmologia (6)"<<endl;
-cout<< "Traumatologia (7)"<<endl;
-cout<< "Urologia (8)"<<endl;
-cout<< "Oncologia (9)"<<endl;
-cout<< "Psiquiatria (10)"<<endl;
-cout<< "Endocrinologia (11)"<<endl;
-cout<< "Gastroenterologia (12)"<<endl;
-cout<< "Neumologia (13)"<<endl;
-cout<< "Otorrinolaringologia (14)"<<endl;
-cout<< "Reumatologia (15)"<<endl;
-cout<< "Cirugia General (16)"<<endl;
-cout<< "Medicina Interna (17)"<<endl;
-cout<< "Nefrologia (18)"<<endl;
-cout<< "Hematologia (19)"<<endl;
-cout<< "Medicina Familiar (20)"<<endl;
-cin >> newMed.idEspecialidad;
+newMed.idEspecialidad = elegirEspecialidad(especialidades);
 cout << "Dias en los que atiende (puede seleccionar mas de 1): "<< endl;
 int i = 0;
 int dia = 1;
