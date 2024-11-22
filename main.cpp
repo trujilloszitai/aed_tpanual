@@ -49,13 +49,13 @@ struct nodoLM {
 };
 
 struct nodoT {
-Turno info;
+  Turno info;
   nodoT *sgte;
 };
 
 struct infoT {
   int idMedico;
-  nodoT * sublista;
+  nodoT *sublista;
 };
 
 struct nodoLT {
@@ -69,6 +69,7 @@ void altaMedico(nodoLM *&);
 void pushMedico(nodoLM *&, Medico);
 void pushTurno(nodoT *&, Turno);
 void pushListaTurno(nodoLT *&, infoT);
+nodoLP *buscarPaciente(nodoLP *, char[]);
 nodoLP *leerArchivoPacientes(FILE *);
 nodoLM *leerArchivoMedicos(FILE *);
 nodoLT *leerArchivoTurnos(FILE *);
@@ -77,27 +78,36 @@ void cargarArchivoMedicos(FILE *, Medico[]);
 void cargarArchivoTurnos(FILE *, infoT[]);
 
 int main() {
-  // Paciente pacientes[100] = {};
-  // Medico medicos[35] = {};
-  // infoT turnos[100] = {};
+    char especialidades[20][50+1] = {
+        "Cardiología",
+        "Pediatría",
+        "Ginecología",
+        "Dermatología",
+        "Neurología",
+        "Oftalmología",
+        "Traumatología",
+        "Urología",
+        "Oncología",
+        "Psiquiatría",
+        "Endocrinología",
+        "Gastroenterología",
+        "Neumología",
+        "Otorrinolaringología",
+        "Reumatología",
+        "Cirugía General",
+        "Medicina Interna",
+        "Nefrología",
+        "Hematología",
+        "Medicina Familiar"
+    };
 
-  // generarPacientes(pacientes, 100);
-  // generarMedicos(medicos, 35);
-  // generarTurnos(turnos, 100);
-  // cargarArchivoPacientes(fPacientes, pacientes);
-  // cargarArchivoMedicos(fMedicos, medicos);
-  // cargarArchivoTurnos(fTurnos, turnos);
+  FILE *fPacientes = fopen("pacientes.bin", "rb");
+  FILE *fMedicos = fopen("medicos.bin", "rb");
+  FILE *fTurnos = fopen("turnos.bin", "rb");
 
- FILE *fPacientes = fopen("pacientes.bin", "rb");
- FILE *fMedicos = fopen("medicos.bin", "rb");
- FILE *fTurnos = fopen("turnos.bin", "rb");
-
-
-
- nodoLM * ListaDeM = leerArchivoMedicos(fMedicos);
- nodoLP * ListaDeP = leerArchivoPacientes(fPacientes);
- nodoLT * ListaDeListasT = leerArchivoTurnos(fTurnos);
-
+  nodoLM *ListaDeM = leerArchivoMedicos(fMedicos);
+  nodoLP *ListaDeP = leerArchivoPacientes(fPacientes);
+  nodoLT *ListaDeListasT = leerArchivoTurnos(fTurnos);
 
   int opcion = 0;
   while (true) {
@@ -138,8 +148,7 @@ int main() {
           // Pacientes
           switch (accion) {
           case 1:
-          //dar de alta paciente
-           altaPaciente(ListaDeP);
+            altaPaciente(ListaDeP);
             break;
           case 2:
           //buscar paciente
@@ -301,19 +310,6 @@ void altaPaciente(nodoLP *&lista) {
   fclose(f);
 }
 
-/*struct Medico {
-  int id = 0;
-  char nombre[50 + 1] = "";
-  char apellido[50 + 1] = "";
-  int matricula = 0;
-  int idEspecialidad = 0;
-  int diasDeAtencion[7] = {0};
-  float rangoHorario[2] = {0.0};
-  int tiempoDeConsulta = 0;
-};*/
-
-
-
 void altaMedico(nodoLM *&lista){
 Medico newMed; 
 FILE * f = fopen("medicos.bin", "rb+");
@@ -374,18 +370,32 @@ for(int i = 0; i < 7; i++){
 */
 }
 
-
-void altaTurno(nodoT *&lista) {
-    int opcion;
-    cout << "Turnos - Alta de Turno" << endl;
-    while(opcion != 1 && opcion != 2) {
-        cout << "¿El solicitante ya es paciente de la clínica?" << endl;
-        cout << "Sí (1)" << endl;
-        cout << "No (2)" << endl;
+void altaTurno(nodoLT *&listaT, nodoLP *&listaP) {
+  int opcion;
+  char dniPaciente[8 + 1] = {""};
+  nodoLP *p = NULL;
+  cout << "Turnos - Alta de Turno" << endl;
+  while (opcion != 1 && opcion != 2) {
+    cout << "¿El solicitante ya es paciente de la clinica?" << endl;
+    cout << "Si (1)" << endl;
+    cout << "No (2)" << endl;
+    cin >> opcion;
+  }
+  if (opcion == 2) {
+    cout << "Se procedera a crear un nuevo paciente" << endl;
+    altaPaciente(listaP);
+    strcpy(dniPaciente, listaP->info.dni);
+    p = listaP;
+  }
+  if (opcion == 1) {
+    while (p == NULL) {
+      cout << "Ingrese el DNI del paciente: ";
+      cin >> dniPaciente;
+      p = buscarPaciente(listaP, dniPaciente);
+      if (p == NULL)
+        cout << "No se ha encontrado al paciente" << endl;
     }
-    if (opcion == 0) {
-
-    }
+  }
 
 }
 
@@ -424,4 +434,13 @@ void pushListaTurno(nodoLT *&lista, infoT info) {
   lt->info = info;
   lt->sgte = lista;
   lista = lt;
+}
+
+nodoLP *buscarPaciente(nodoLP *lista, char dni[]) {
+  nodoLP *listaP = lista;
+  while (listaP != NULL && strcmp(dni, listaP->info.dni) != 0) {
+    listaP = listaP->sgte;
+  }
+  if (strcmp(dni, listaP->info.dni) == 0)
+    return listaP;
 }
