@@ -418,7 +418,7 @@ void altaTurno(nodoLT *&listaT, nodoLP *&listaP, char especialidades[][50+1]) {
   idEspecialidad = elegirEspecialidad(especialidades);
 }
 
-void actualizarStatus(nodoLT *&listaLT, int idTurno, int idMedico) {
+void actualizarStatus(nodoLT *&listaLT, int idTurno, int IDmedico) {
   nodoLT * listaAux = listaLT;
   char newStat;
   cout<< "Seleccione el nuevo status: "<<endl;
@@ -427,18 +427,21 @@ void actualizarStatus(nodoLT *&listaLT, int idTurno, int idMedico) {
   cout<< "Atendido (A) "<<endl;
   cout<< "No atendido pero sin cancelar (X) "<<endl;
   cin>>newStat;
-    while(listaAux != NULL && listaAux->info.idMedico != idMedico){
+    while(listaAux != NULL && listaAux->info.idMedico != IDmedico){
     listaAux = listaAux->sgte;
   }
-  if (listaAux->info.idMedico == idMedico){
-    listaLT = listaAux;
+  if (listaAux != NULL && listaAux->info.idMedico == IDmedico){
     while (listaAux->info.sublista != NULL && listaAux->info.sublista->info.id != idTurno){
       listaAux->info.sublista = listaAux->info.sublista->sgte;
     }
-  if(listaAux->info.sublista->info.id == idTurno){
+  if(listaAux->info.sublista != NULL && listaAux->info.sublista->info.id == idTurno){
      listaAux->info.sublista->info.estatus = newStat;
      cout<<"El status se actualizo con exito"<<endl;
+    }else{
+      cout<<"El id de turno es erroneo o el turno no existe"<<endl;
     }
+  }else{
+    cout<<"El id de medico es erroneo"<<endl;
   }
 }
 
