@@ -19,7 +19,7 @@ struct Medico {
   int matricula = 0;
   int idEspecialidad = 0;
   int diasDeAtencion[7] = {0};
-  float rangoHorario[2] = {0.0};
+  int rangoHorario[2] = {0};
   int tiempoDeConsulta = 0;
 };
 
@@ -79,31 +79,31 @@ void cargarArchivoTurnos(FILE *, infoT[]);
 
 int main() {
     char especialidades[20][50+1] = {
-        "Cardiología",
-        "Pediatría",
-        "Ginecología",
-        "Dermatología",
-        "Neurología",
-        "Oftalmología",
-        "Traumatología",
-        "Urología",
-        "Oncología",
-        "Psiquiatría",
-        "Endocrinología",
-        "Gastroenterología",
-        "Neumología",
-        "Otorrinolaringología",
-        "Reumatología",
-        "Cirugía General",
+        "Cardiologia",
+        "Pediatria",
+        "Ginecologia",
+        "Dermatologia",
+        "Neurologia",
+        "Oftalmologia",
+        "Traumatologia",
+        "Urologia",
+        "Oncologia",
+        "Psiquiatria",
+        "Endocrinologia",
+        "Gastroenterologia",
+        "Neumologia",
+        "Otorrinolaringologia",
+        "Reumatologia",
+        "Cirugia General",
         "Medicina Interna",
-        "Nefrología",
-        "Hematología",
+        "Nefrologia",
+        "Hematologia",
         "Medicina Familiar"
     };
 
-  FILE *fPacientes = fopen("pacientes.bin", "rb");
-  FILE *fMedicos = fopen("medicos.bin", "rb");
-  FILE *fTurnos = fopen("turnos.bin", "rb");
+  FILE *fPacientes = fopen("pacientes.bin", "rb+");
+  FILE *fMedicos = fopen("medicos.bin", "rb+");
+  FILE *fTurnos = fopen("turnos.bin", "rb+");
 
   nodoLM *ListaDeM = leerArchivoMedicos(fMedicos);
   nodoLP *ListaDeP = leerArchivoPacientes(fPacientes);
@@ -162,6 +162,7 @@ int main() {
           // Medicos
           switch (accion) {
           case 1:
+          altaMedico(ListaDeM);
             break;
           case 2:
             break;
@@ -321,13 +322,32 @@ cout << "Apellido: " << endl;
 cin >> newMed.apellido;
 cout << "Numero de matricula: " << endl;
 cin >> newMed.matricula;
-cout << "Especialidad: " << endl;
+cout << "Elija 1 especialidad: " << endl;
+cout<< "Cardiologia (1)"<<endl;
+cout<< "Pediatria (2)"<<endl;
+cout<< "Ginecologia (3)"<<endl;
+cout<< "Dermatologia (4)"<<endl;
+cout<< "Neurologia (5)"<<endl;
+cout<< "Oftalmologia (6)"<<endl;
+cout<< "Traumatologia (7)"<<endl;
+cout<< "Urologia (8)"<<endl;
+cout<< "Oncologia (9)"<<endl;
+cout<< "Psiquiatria (10)"<<endl;
+cout<< "Endocrinologia (11)"<<endl;
+cout<< "Gastroenterologia (12)"<<endl;
+cout<< "Neumologia (13)"<<endl;
+cout<< "Otorrinolaringologia (14)"<<endl;
+cout<< "Reumatologia (15)"<<endl;
+cout<< "Cirugia General (16)"<<endl;
+cout<< "Medicina Interna (17)"<<endl;
+cout<< "Nefrologia (18)"<<endl;
+cout<< "Hematologia (19)"<<endl;
+cout<< "Medicina Familiar (20)"<<endl;
 cin >> newMed.idEspecialidad;
 cout << "Dias en los que atiende (puede seleccionar mas de 1): "<< endl;
 int i = 0;
-int dia;
-int dias[7] = {0};
-while(dia =! 0 && i < 7){
+int dia = 1;
+while(dia != 0 && i < 7){
   cout<<"Domingo (1)"<< endl;
   cout<<"Lunes (2)"<< endl;
   cout<<"Martes (3)"<< endl;
@@ -337,41 +357,43 @@ while(dia =! 0 && i < 7){
   cout<<"Sabado (7)"<< endl;
   cout<<"Listo (0)"<<endl;
   cin>>dia;
-  dias[i] = dia;
+  newMed.diasDeAtencion[i] = dia;
   i++;
-  if(dia == 0 && dias[0] == 0){
+  if(dia == 0 && newMed.diasDeAtencion[0] == 0){
     cout << "Ingrse al menos 1 dia: "<<endl;
     i = 0;
     dia = 1;
   }
-  
 }
-/*
-for(int i = 0; i < 7; i++){
-  int dia;
-  int dias[7] = {0};
-  cout<<"Domingo (1)"<< endl;
-  cout<<"Lunes (2)"<< endl;
-  cout<<"Martes (3)"<< endl;
-  cout<<"Miercoles (4)"<< endl;
-  cout<<"Jueves (5)"<< endl;
-  cout<<"Viernes (6)"<< endl;
-  cout<<"Sabado (7)"<< endl;
-  cout<<"Listo (0)"<<endl;
-  cin>>dias[i];
-  if(dias[0] == 0){
-    cout << "Ingrse al menos 1 dia: "<<endl;
-    i = 0;
-  }else if(dias[0] =! 0 && dia == 0){
-    
-    i = 6;
+cout<<"Ingrese HORA de comienzo de atencion (formato 24hs): "<<endl;
+cin>>newMed.rangoHorario[0];
+cout<<"Ingrese HORA de finalizacion de atencion: "<<endl;
+cin>>newMed.rangoHorario[1];
+int idDurCons;
+cout<<"Ingrese el tiempo que duran sus consultas: "<<endl;
+cout<<"15 minutos (1)"<<endl;
+cout<<"30 minutos (2)"<<endl;
+cout<<"45 minutos (3)"<<endl;
+cout<<"60 minutos (4)"<<endl;
+cin>>idDurCons;
+if(idDurCons == 1){
+  newMed.tiempoDeConsulta = 15;
+  } else if(idDurCons == 2){
+  newMed.tiempoDeConsulta = 30;
+  }else if(idDurCons == 3){
+  newMed.tiempoDeConsulta = 45;
+  }else if(idDurCons == 4){
+  newMed.tiempoDeConsulta = 60;
   }
-}
-*/
+  pushMedico(lista, newMed);
+  fseek(f, id * sizeof(Medico), SEEK_SET);
+  fwrite(&newMed, sizeof(Medico), 1, f);
+  fclose(f);
 }
 
+
 void altaTurno(nodoLT *&listaT, nodoLP *&listaP) {
-  int opcion;
+  int opcion = 0;
   char dniPaciente[8 + 1] = {""};
   nodoLP *p = NULL;
   cout << "Turnos - Alta de Turno" << endl;
@@ -398,8 +420,6 @@ void altaTurno(nodoLT *&listaT, nodoLP *&listaP) {
   }
 
 }
-
-void altaMedico(nodoLM *&lista) {}
 
 void actualizarEstatus(nodoLM *listaM, nodoT *&listaT, int idMedico) {}
 
@@ -443,4 +463,5 @@ nodoLP *buscarPaciente(nodoLP *lista, char dni[]) {
   }
   if (strcmp(dni, listaP->info.dni) == 0)
     return listaP;
+    return NULL;
 }
