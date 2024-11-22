@@ -65,6 +65,7 @@ struct nodoLT {
 
 void altaPaciente(nodoLP *&);
 void pushPaciente(nodoLP *&, Paciente);
+void altaMedico(nodoLM *&);
 void pushMedico(nodoLM *&, Medico);
 void pushTurno(nodoT *&, Turno);
 void pushListaTurno(nodoLT *&, infoT);
@@ -137,11 +138,14 @@ int main() {
           // Pacientes
           switch (accion) {
           case 1:
+          //dar de alta paciente
            altaPaciente(ListaDeP);
             break;
           case 2:
+          //buscar paciente
             break;
           case 3:
+          //listar pacientes
             break;
           }
           break;
@@ -296,6 +300,80 @@ void altaPaciente(nodoLP *&lista) {
   fwrite(&nuevoPaciente, sizeof(Paciente), 1, f);
   fclose(f);
 }
+
+/*struct Medico {
+  int id = 0;
+  char nombre[50 + 1] = "";
+  char apellido[50 + 1] = "";
+  int matricula = 0;
+  int idEspecialidad = 0;
+  int diasDeAtencion[7] = {0};
+  float rangoHorario[2] = {0.0};
+  int tiempoDeConsulta = 0;
+};*/
+
+
+
+void altaMedico(nodoLM *&lista){
+Medico newMed; 
+FILE * f = fopen("medicos.bin", "rb+");
+int id = cantRegMedicos(f) + 1;
+cout << "Nuevo medico (" << id << ")" << endl;
+cout << "Nombre: "<< endl;
+cin >> newMed.nombre;
+cout << "Apellido: " << endl;
+cin >> newMed.apellido;
+cout << "Numero de matricula: " << endl;
+cin >> newMed.matricula;
+cout << "Especialidad: " << endl;
+cin >> newMed.idEspecialidad;
+cout << "Dias en los que atiende (puede seleccionar mas de 1): "<< endl;
+int i = 0;
+int dia;
+int dias[7] = {0};
+while(dia =! 0 && i < 7){
+  cout<<"Domingo (1)"<< endl;
+  cout<<"Lunes (2)"<< endl;
+  cout<<"Martes (3)"<< endl;
+  cout<<"Miercoles (4)"<< endl;
+  cout<<"Jueves (5)"<< endl;
+  cout<<"Viernes (6)"<< endl;
+  cout<<"Sabado (7)"<< endl;
+  cout<<"Listo (0)"<<endl;
+  cin>>dia;
+  dias[i] = dia;
+  i++;
+  if(dia == 0 && dias[0] == 0){
+    cout << "Ingrse al menos 1 dia: "<<endl;
+    i = 0;
+    dia = 1;
+  }
+  
+}
+/*
+for(int i = 0; i < 7; i++){
+  int dia;
+  int dias[7] = {0};
+  cout<<"Domingo (1)"<< endl;
+  cout<<"Lunes (2)"<< endl;
+  cout<<"Martes (3)"<< endl;
+  cout<<"Miercoles (4)"<< endl;
+  cout<<"Jueves (5)"<< endl;
+  cout<<"Viernes (6)"<< endl;
+  cout<<"Sabado (7)"<< endl;
+  cout<<"Listo (0)"<<endl;
+  cin>>dias[i];
+  if(dias[0] == 0){
+    cout << "Ingrse al menos 1 dia: "<<endl;
+    i = 0;
+  }else if(dias[0] =! 0 && dia == 0){
+    
+    i = 6;
+  }
+}
+*/
+}
+
 
 void altaTurno(nodoT *&lista) {
     int opcion;
