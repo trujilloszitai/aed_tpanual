@@ -75,30 +75,19 @@ nodoLT *leerArchivoTurnos(FILE *);
 void cargarArchivoPacientes(FILE *, Paciente[]);
 void cargarArchivoMedicos(FILE *, Medico[]);
 void cargarArchivoTurnos(FILE *, infoT[]);
+int elegirEspecialidad(char[][50 + 1]);
 
 int main() {
-    char especialidades[20][50+1] = {
-        "Cardiología",
-        "Pediatría",
-        "Ginecología",
-        "Dermatología",
-        "Neurología",
-        "Oftalmología",
-        "Traumatología",
-        "Urología",
-        "Oncología",
-        "Psiquiatría",
-        "Endocrinología",
-        "Gastroenterología",
-        "Neumología",
-        "Otorrinolaringología",
-        "Reumatología",
-        "Cirugía General",
-        "Medicina Interna",
-        "Nefrología",
-        "Hematología",
-        "Medicina Familiar"
-    };
+  char especialidades[20][50 + 1] = {"Cardiologia",      "Pediatria",
+                                     "Ginecologia",      "Dermatologia",
+                                     "Neurologia",       "Oftalmologia",
+                                     "Traumatologia",    "Urologia",
+                                     "Oncologia",        "Psiquiatria",
+                                     "Endocrinologia",   "Gastroenterologia",
+                                     "Neumologia",       "Otorrinolaringologia",
+                                     "Reumatologia",     "Cirugia General",
+                                     "Medicina Interna", "Nefrologia",
+                                     "Hematologia",      "Medicina Familiar"};
 
   FILE *fPacientes = fopen("pacientes.bin", "rb");
   FILE *fMedicos = fopen("medicos.bin", "rb");
@@ -247,13 +236,6 @@ nodoLT *leerArchivoTurnos(FILE *f) {
   return lp;
 }
 
-void cargarArchivoTurnos(FILE *f, infoT turnos[]) {
-  for (int i = 0; i < 100; i++) {
-    infoT t = turnos[i];
-    fwrite(&t, sizeof(infoT), 1, f);
-  }
-  fclose(f);
-}
 int cantRegPacientes(FILE *&f) {
   // preservar la posicion actual
   int posActual = ftell(f);
@@ -307,9 +289,30 @@ void altaPaciente(nodoLP *&lista) {
   fclose(f);
 }
 
-void altaTurno(nodoLT *&listaT, nodoLP *&listaP) {
+// Retorna la posicion de la especialidad elegida
+int elegirEspecialidad(char especialidades[][50 + 1]) {
+  int i, idEspecialidad;
+  i = idEspecialidad = 0;
+  cout << "Especialidades disponibles" << endl;
+  for (i; i < 5; i++) {
+    cout << especialidades[i] << " (" << i + 1 << ") | ";
+    cout << especialidades[i + 5] << " (" << i + 5 + 1 << ") | ";
+    cout << especialidades[i + 10] << " (" << i + 10 + 1 << ") | ";
+    cout << especialidades[i + 15] << " (" << i + 15 + 1 << ") | " << endl;
+  }
+
+  while(idEspecialidad < 1 || idEspecialidad > 20) {
+      cout << "Elija la especialidad:";
+      cin >> idEspecialidad;
+  }
+
+  return idEspecialidad;
+}
+
+void altaTurno(nodoLT *&listaT, nodoLP *&listaP, char especialidades[][50+1]) {
   int opcion;
   char dniPaciente[8 + 1] = {""};
+  int idEspecialidad;
   nodoLP *p = NULL;
   cout << "Turnos - Alta de Turno" << endl;
   while (opcion != 1 && opcion != 2) {
@@ -334,6 +337,7 @@ void altaTurno(nodoLT *&listaT, nodoLP *&listaP) {
     }
   }
 
+  idEspecialidad = elegirEspecialidad(especialidades);
 }
 
 void altaMedico(nodoLM *&lista) {}
@@ -380,4 +384,16 @@ nodoLP *buscarPaciente(nodoLP *lista, char dni[]) {
   }
   if (strcmp(dni, listaP->info.dni) == 0)
     return listaP;
+  return NULL;
+}
+
+nodoLM *filtrarMedicos(nodoLM* lista, int idEspecialidad) {
+    nodoLM* listaM = lista;
+    nodoLM* especialistas = NULL;
+    while(lista != NULL) {
+        Medico m = listaM->info;
+        if(m.idEspecialidad == idEspecialidad) pushMedico(especialistas, m);
+        listaM = listaM->sgte;
+    }
+    return especialistas;
 }
