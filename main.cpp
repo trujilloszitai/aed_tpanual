@@ -77,16 +77,28 @@ void cargarArchivoMedicos(FILE *, Medico[]);
 void cargarArchivoTurnos(FILE *, infoT[]);
 
 int main() {
-  // Paciente pacientes[100] = {};
-  // Medico medicos[35] = {};
-  // infoT turnos[100] = {};
-
-  // generarPacientes(pacientes, 100);
-  // generarMedicos(medicos, 35);
-  // generarTurnos(turnos, 100);
-  // cargarArchivoPacientes(fPacientes, pacientes);
-  // cargarArchivoMedicos(fMedicos, medicos);
-  // cargarArchivoTurnos(fTurnos, turnos);
+    char especialidades[20][50+1] = {
+        "Cardiología",
+        "Pediatría",
+        "Ginecología",
+        "Dermatología",
+        "Neurología",
+        "Oftalmología",
+        "Traumatología",
+        "Urología",
+        "Oncología",
+        "Psiquiatría",
+        "Endocrinología",
+        "Gastroenterología",
+        "Neumología",
+        "Otorrinolaringología",
+        "Reumatología",
+        "Cirugía General",
+        "Medicina Interna",
+        "Nefrología",
+        "Hematología",
+        "Medicina Familiar"
+    };
 
   FILE *fPacientes = fopen("pacientes.bin", "rb");
   FILE *fMedicos = fopen("medicos.bin", "rb");
