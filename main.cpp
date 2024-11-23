@@ -84,6 +84,8 @@ int elegirEspecialidad(char[][50 + 1], int);
 nodoLM *filtrarMedicos(nodoLM *, int);
 void obtenerDia(int, char[]);
 void obtenerMes(int, char[]);
+int elegirEspecialidad(char[][50 + 1]);
+void actualizarStatus(nodoLT*&, int, int);
 
 int main() {
   char especialidades[20][50 + 1] = {"Cardiologia",      "Pediatria",
@@ -103,7 +105,7 @@ int main() {
 
   nodoLM *ListaDeM = leerArchivoMedicos(fMedicos);
   nodoLP *ListaDeP = leerArchivoPacientes(fPacientes);
-  nodoLT *ListaDeListasT = leerArchivoTurnos(fTurnos);
+  nodoLT *ListaLT = leerArchivoTurnos(fTurnos);
 
   int opcion = 0;
   while (true) {
@@ -124,7 +126,7 @@ int main() {
         cout << "Ver atenciones efectivas (4)" << endl;
         break;
       case 3:
-        cout << "Gestion de Turnos - Seleccione una accion" << endl;
+        cout << "Gestion de Especialidades - Seleccione una accion" << endl;
         cout << "Listar especialidades (1)" << endl;
         cout << "Buscar especialidad (2)" << endl;
         break;
@@ -181,11 +183,24 @@ int main() {
           // Turnos
           switch (accion) {
           case 1:
-            altaTurno(ListaDeListasT, ListaDeM, ListaDeP, especialidades);
+            altaTurno(ListaLT, ListaDeM, ListaDeP, especialidades);
+          //nuevo turno
             break;
           case 2:
+          //actualizar status
+          int idMedico;
+          int idTurno;
+          cout<<"Indique el id del medico: ";
+          cin>>idMedico;
+          cout<<"Indique el id del turno: ";
+          cin>>idTurno;
+          actualizarStatus(ListaLT,idTurno, idMedico);
             break;
           case 3:
+          //turnos pendientes
+            break;
+          case 4:
+            //ver cancelaciones
             break;
           }
           break;
@@ -501,7 +516,32 @@ void altaTurno(nodoLT *&listaLT, nodoLM *listaM, nodoLP *listaP,
   }
 }
 
-void actualizarEstatus(nodoLM *listaM, nodoT *&listaT, int idMedico) {}
+void actualizarStatus(nodoLT *&listaLT, int idTurno, int IDmedico) {
+  nodoLT * listaAux = listaLT;
+  char newStat;
+  cout<< "Seleccione el nuevo status: "<<endl;
+  cout<< "Pendiente (P) "<<endl;
+  cout<< "Cancelado (C) "<<endl;
+  cout<< "Atendido (A) "<<endl;
+  cout<< "No atendido pero sin cancelar (X) "<<endl;
+  cin>>newStat;
+    while(listaAux != NULL && listaAux->info.idMedico != IDmedico){
+    listaAux = listaAux->sgte;
+  }
+  if (listaAux != NULL && listaAux->info.idMedico == IDmedico){
+    while (listaAux->info.sublista != NULL && listaAux->info.sublista->info.id != idTurno){
+      listaAux->info.sublista = listaAux->info.sublista->sgte;
+    }
+  if(listaAux->info.sublista != NULL && listaAux->info.sublista->info.id == idTurno){
+     listaAux->info.sublista->info.estatus = newStat;
+     cout<<"El status se actualizo con exito"<<endl;
+    }else{
+      cout<<"El id de turno es erroneo o el turno no existe"<<endl;
+    }
+  }else{
+    cout<<"El id de medico es erroneo"<<endl;
+  }
+}
 
 void turnosPendientes(nodoLM *listaM, nodoT *&listaT, int idMedico, int mes) {}
 
