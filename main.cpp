@@ -65,18 +65,23 @@ struct nodoLT {
 
 void altaPaciente(nodoLP *&);
 void pushPaciente(nodoLP *&, Paciente);
-void altaMedico(nodoLM *&, char[][50 + 1]);
+void altaMedico(nodoLM *&, nodoLT *&, char[][50 + 1]);
 void altaTurno(nodoLT *&, nodoLM *, nodoLP *, char[][50 + 1]);
 void pushMedico(nodoLM *&, Medico);
 void pushTurno(nodoT *&, Turno);
 void pushListaTurno(nodoLT *&, infoT);
+infoT crearListaTurnos(int);
 nodoLP *buscarPaciente(nodoLP *, char[]);
 nodoLM *buscarMedico(nodoLM *, int);
 nodoT *buscarListaTurnos(nodoLT *, int);
 int turnoDisponible(nodoT *, Turno);
 nodoLP *leerArchivoPacientes(FILE *);
 nodoLM *leerArchivoMedicos(FILE *);
-nodoLT *leerArchivoTurnos(FILE *);
+nodoLT *leerArchivoTurnos();
+nodoLT *guardarListaTurnos();
+nodoT *insertarTurnoOrdenado(nodoT *, Turno);
+void guardarLista(nodoLT *lista);
+void insertarTurnoEnArchivo(Turno, int);
 void cargarArchivoPacientes(FILE *, Paciente[]);
 void cargarArchivoMedicos(FILE *, Medico[]);
 void cargarArchivoTurnos(FILE *, infoT[]);
@@ -85,7 +90,7 @@ nodoLM *filtrarMedicos(nodoLM *, int);
 void obtenerDia(int, char[]);
 void obtenerMes(int, char[]);
 int elegirEspecialidad(char[][50 + 1]);
-void actualizarStatus(nodoLT*&, int, int);
+void actualizarStatus(nodoLT *&, int, int);
 
 int main() {
   char especialidades[20][50 + 1] = {"Cardiologia",      "Pediatria",
@@ -105,7 +110,7 @@ int main() {
 
   nodoLM *ListaDeM = leerArchivoMedicos(fMedicos);
   nodoLP *ListaDeP = leerArchivoPacientes(fPacientes);
-  nodoLT *ListaLT = leerArchivoTurnos(fTurnos);
+  nodoLT *ListaLT = leerArchivoTurnos();
 
   int opcion = 0;
   while (true) {
@@ -160,7 +165,7 @@ int main() {
           // Medicos
           switch (accion) {
           case 1:
-            altaMedico(ListaDeM, especialidades);
+            altaMedico(ListaDeM, ListaLT, especialidades);
             break;
           case 2:
             break;
@@ -184,23 +189,23 @@ int main() {
           switch (accion) {
           case 1:
             altaTurno(ListaLT, ListaDeM, ListaDeP, especialidades);
-          //nuevo turno
+            // nuevo turno
             break;
           case 2:
-          //actualizar status
-          int idMedico;
-          int idTurno;
-          cout<<"Indique el id del medico: ";
-          cin>>idMedico;
-          cout<<"Indique el id del turno: ";
-          cin>>idTurno;
-          actualizarStatus(ListaLT,idTurno, idMedico);
+            // actualizar status
+            int idMedico;
+            int idTurno;
+            cout << "Indique el id del medico: ";
+            cin >> idMedico;
+            cout << "Indique el id del turno: ";
+            cin >> idTurno;
+            actualizarStatus(ListaLT, idTurno, idMedico);
             break;
           case 3:
-          //turnos pendientes
+            // turnos pendientes
             break;
           case 4:
-            //ver cancelaciones
+            // ver cancelaciones
             break;
           }
           break;
@@ -221,7 +226,6 @@ int main() {
     if (accion == 0 && opcion != 0)
       opcion = 0;
   }
-
   return 0;
 }
 
@@ -244,23 +248,184 @@ nodoLM *leerArchivoMedicos(FILE *f) {
   return lista;
 }
 
-nodoLT *leerArchivoTurnos(FILE *f) {
-  Turno t;
-  infoT i;
-  nodoLT *lp = NULL;
-  nodoT *ls = NULL;
-  int ultimoIdMedico = 1;
-  while (fread(&i, sizeof(infoT), 1, f)) {
-    t = i.sublista->info;
-    if (i.idMedico == ultimoIdMedico) {
-      pushTurno(ls, t);
+// nodoLT *leerArchivoTurnos(FILE *f) {
+//   Turno t;
+//   infoT i;
+//   nodoLT *lp = NULL;
+//   nodoT *ls = NULL;
+//   int ultimoIdMedico = 1;
+//   while (fread(&i, sizeof(infoT), 1, f)) {
+//     t = i.sublista->info;
+//     if (i.idMedico == ultimoIdMedico) {
+//       pushTurno(ls, t);
+//     } else {
+//       ultimoIdMedico = i.idMedico;
+//       pushListaTurno(lp, i);
+//       ls = NULL;
+//     }
+//   }
+//   return lp;
+// }
+nodoLT *leerArchivoTurnos() {
+  // Leer la cantidad de nodos principales
+  FILE* f = fopen("turnos.bin", "rb+");
+  int N;
+  fread(&N, sizeof(int), 1, f);
+  nodoLT *lista = NULL;
+  nodoLT *ultimo = NULL;
+  for (int i = 0; i < N; i++) {
+    // Crear un nuevo nodo principal
+    nodoLT *nuevo = new nodoLT;
+    nuevo->sgte = NULL;
+
+    // Leer el idMedico
+    fread(&nuevo->info.idMedico, sizeof(int), 1, f);
+
+    // Leer la cantidad de turnos en la sublista
+    int cantidadTurnos;
+    fread(&cantidadTurnos, sizeof(int), 1, f);
+
+    // Leer los turnos de la sublista
+    nodoT *sublista = NULL;
+    nodoT *ultimoSub = NULL;
+
+    for (int j = 0; j < cantidadTurnos; j++) {
+      // Crear un nuevo nodo de turno
+      nodoT *nuevoTurno = new nodoT;
+      nuevoTurno->sgte = NULL;
+
+      // Leer los datos del turno
+      fread(&nuevoTurno->info, sizeof(Turno), 1, f);
+
+      // Insertar en la sublista
+      if (sublista == NULL) {
+        sublista = nuevoTurno;
+      } else {
+        ultimoSub->sgte = nuevoTurno;
+      }
+      ultimoSub = nuevoTurno;
+    }
+
+    nuevo->info.sublista = sublista;
+
+    // Insertar en la lista principal
+    if (lista == NULL) {
+      lista = nuevo;
     } else {
-      ultimoIdMedico = i.idMedico;
-      pushListaTurno(lp, i);
-      ls = NULL;
+      ultimo->sgte = nuevo;
+    }
+    ultimo = nuevo;
+  }
+
+  fclose(f);
+  return lista;
+}
+
+void guardarListaTurnos(nodoLT *lista) {
+  FILE *fp = fopen("turnos.bin", "rb+");
+  if (fp == NULL) {
+    std::cerr << "Error al abrir el archivo." << std::endl;
+    return;
+  }
+  // contar cantidad de nodos
+  int cantidadNodos = 0;
+  nodoLT *temp = lista;
+  while (temp != NULL) {
+    cantidadNodos++;
+    temp = temp->sgte;
+  }
+  // escribir cantidad de nodos
+  fwrite(&cantidadNodos, sizeof(int), 1, fp);
+  // escribir nodos y sus sublistas
+  temp = lista;
+  while (temp != NULL) {
+    // Escribir el idMedico
+    fwrite(&temp->info.idMedico, sizeof(int), 1, fp);
+    // Contar la cantidad de turnos en la sublista
+    int cantidadTurnos = 0;
+    nodoT *subtemp = temp->info.sublista;
+    while (subtemp != NULL) {
+      cantidadTurnos++;
+      subtemp = subtemp->sgte;
+    }
+    // Escribir la cantidad de turnos
+    fwrite(&cantidadTurnos, sizeof(int), 1, fp);
+    // Escribir cada turno en la sublista
+    subtemp = temp->info.sublista;
+    while (subtemp != NULL) {
+      fwrite(&subtemp->info, sizeof(Turno), 1, fp);
+      subtemp = subtemp->sgte;
+    }
+    temp = temp->sgte;
+  }
+  fclose(fp);
+}
+
+// Insertar turno en la sublista
+nodoT *insertarTurnoOrdenado(nodoT *sublista, Turno t) {
+  nodoT *nuevo = new nodoT;
+  nuevo->info = t;
+  nuevo->sgte = NULL;
+  if (sublista == NULL || sublista->info.id > t.id) {
+    nuevo->sgte = sublista;
+    return nuevo;
+  }
+  nodoT *actual = sublista;
+  while (actual->sgte != NULL && actual->sgte->info.id < t.id) {
+    actual = actual->sgte;
+  }
+  nuevo->sgte = actual->sgte;
+  actual->sgte = nuevo;
+  return sublista;
+}
+
+void insertarTurnoEnArchivo(Turno nuevoTurno, int idMedico) {
+  // Leer la lista desde el archivo
+  nodoLT *lista = leerArchivoTurnos();
+  // Buscar si el médico ya existe
+  nodoLT *actual = lista;
+  nodoLT *anterior = NULL;
+  while (actual != NULL && actual->info.idMedico < idMedico) {
+    anterior = actual;
+    actual = actual->sgte;
+  }
+  if (actual != NULL && actual->info.idMedico == idMedico) {
+    // Insertar el turno en la sublista del médico
+    nodoT *nuevaSublista = insertarTurnoOrdenado(actual->info.sublista, nuevoTurno);
+    actual->info.sublista = nuevaSublista;
+  } else {
+    // Crear un nuevo nodo para la lista del médico
+    nodoLT *nuevoNodo = new nodoLT;
+    nuevoNodo->info.idMedico = idMedico;
+    nuevoNodo->info.sublista = NULL;
+    nuevoNodo->sgte = actual;
+    // Insertar el turno en la sublista del nuevo médico
+    nuevoNodo->info.sublista =
+        insertarTurnoOrdenado(nuevoNodo->info.sublista, nuevoTurno);
+    // Conectar el nuevo nodo en la lista principal
+    if (anterior == NULL) {
+      lista = nuevoNodo; // Es el nuevo primer nodo
+    } else {
+      anterior->sgte = nuevoNodo;
     }
   }
-  return lp;
+
+  // Actualizar el archivo
+  guardarLista(lista);
+
+  // Liberar memoria de la lista en memoria
+  nodoLT *temp;
+  while (lista != NULL) {
+    temp = lista;
+    lista = lista->sgte;
+    nodoT *subtemp;
+    while (temp->info.sublista != NULL) {
+      subtemp = temp->info.sublista;
+      temp->info.sublista = temp->info.sublista->sgte;
+      delete subtemp;
+    }
+    delete temp;
+  }
 }
 
 int cantRegPacientes(FILE *&f) {
@@ -326,11 +491,10 @@ int elegirEspecialidad(char especialidades[][50 + 1], int N) {
   }
   cout << endl;
 
+  cout << "Elija la especialidad:";
   while (idEspecialidad < 1 || idEspecialidad > 20) {
-    cout << "Elija la especialidad:";
     cin >> idEspecialidad;
   }
-
   return idEspecialidad;
 }
 
@@ -339,10 +503,10 @@ int elegirMedico(nodoLM *lista) {
   int idElegido = 0;
   int i = 0;
 
-  if (listaM == NULL){
+  if (listaM == NULL) {
     return -1;
   }
-  cout << "Médicos disponibles" << endl;
+  cout << "Medicos disponibles" << endl;
   while (listaM != NULL) {
     Medico m = listaM->info;
     cout << m.apellido << ", " << m.nombre << " (" << m.id << ")" << endl;
@@ -350,17 +514,17 @@ int elegirMedico(nodoLM *lista) {
     i++;
   }
 
+  cout << "Elija el médico deseado: ";
   while (idElegido < 1 || idElegido > i + 1) {
-    cout << "Elija el médico deseado: ";
     cin >> idElegido;
     if (idElegido < 1 || idElegido > i + 1)
-      cout << "Ingrese un id válido" << endl;
+      cout << "Ingrese un id valido" << endl;
   }
-
   return idElegido;
 }
 
-void altaMedico(nodoLM *&lista, char especialidades[][50 + 1]) {
+void altaMedico(nodoLM *&listaM, nodoLT *&listaLT,
+                char especialidades[][50 + 1]) {
   Medico newMed;
   FILE *f = fopen("medicos.bin", "rb+");
   int id = cantRegMedicos(f) == 0 ? 1 : cantRegMedicos(f);
@@ -414,9 +578,11 @@ void altaMedico(nodoLM *&lista, char especialidades[][50 + 1]) {
   } else if (idDurCons == 4) {
     newMed.tiempoDeConsulta = 60;
   }
-  pushMedico(lista, newMed);
+  pushMedico(listaM, newMed);
   fseek(f, id * sizeof(Medico), SEEK_SET);
   fwrite(&newMed, sizeof(Medico), 1, f);
+  infoT nuevaLista = crearListaTurnos(id);
+  pushListaTurno(listaLT, nuevaLista);
   fclose(f);
 }
 
@@ -456,58 +622,49 @@ void altaTurno(nodoLT *&listaLT, nodoLM *listaM, nodoLP *listaP,
           cout << "No hay medicos disponibles en este momento" << endl;
         } else {
           nodoT *listaTurnos = buscarListaTurnos(listaLT, idMedico);
-          if (listaTurnos == NULL)
-            cout << "No hay turnos disponibles para este medico.";
-          else {
-            Turno t;
-            int disponibilidad;
-            cout << "Solicitando turno turno..." << endl;
-            cout << "Mes: ";
-            cin >> t.mes;
-            cout << "Dia: ";
-            cin >> t.dia;
-            cout << "Hora: ";
-            cin >> t.hora;
-            disponibilidad = turnoDisponible(listaTurnos, t);
-            switch (disponibilidad) {
-            case -1:
-              cout << "Ya tiene un turno solicitado para esta fecha" << endl;
-              break;
-            case 0:
-              cout << "No hay un turno disponible para esta fecha" << endl;
-            case 1:
-              nodoLM *nm = buscarMedico(listaM, idMedico);
-              if (nm == NULL)
-                cout << "Se ha producido un error inesperado. Intentelo mas "
-                        "tarde";
-              else {
-                Medico m = nm->info;
-                char dia[15 + 1];
-                char mes[15 + 1];
-                int confirmacion = 0;
-                t.idPaciente = p.id;
-                t.estatus = 'P';
-                obtenerDia(t.dia, dia);
-                obtenerMes(t.mes, mes);
-                cout << "Turno disponible " << endl;
-                cout << "Medico: " << m.apellido << ", " << m.nombre << endl;
-                cout << dia << " " << t.dia << " de " << mes << " a las "
-                     << t.hora << " hs" << endl;
-                cout << "¿Desea confirmar el turno?" << endl;
-                cout << "Confirmar (1)" << endl;
-                cout << "Cancelar (2)" << endl;
-                cout << "Ingrese una opción: ";
-                while (opcion != 1 && opcion != 2) {
-                  cin >> confirmacion;
-                }
-                if (opcion == 1) {
-                  pushTurno(listaTurnos, t);
-                  FILE *f = fopen("turnos.bin", "rb+");
-                  int id = cantRegTurnos(f);
-                  fseek(f, id * sizeof(infoT), SEEK_SET);
-                  fwrite(&t, sizeof(infoT), 1, f);
-                  fclose(f);
-                }
+          Turno t;
+          int disponibilidad;
+          cout << "Solicitando turno..." << endl;
+          cout << "Mes: ";
+          cin >> t.mes;
+          cout << "Dia: ";
+          cin >> t.dia;
+          cout << "Hora: ";
+          cin >> t.hora;
+          disponibilidad = turnoDisponible(listaTurnos, t);
+          switch (disponibilidad) {
+          case -1:
+            cout << "Ya tiene un turno solicitado para esta fecha" << endl;
+            break;
+          case 0:
+            cout << "No hay un turno disponible para esta fecha" << endl;
+          case 1:
+            nodoLM *nm = buscarMedico(listaM, idMedico);
+            if (nm == NULL)
+              cout << "Se ha producido un error inesperado. Intentelo mas "
+                      "tarde";
+            else {
+              Medico m = nm->info;
+              char dia[15 + 1];
+              char mes[15 + 1];
+              int confirmacion = 0;
+              t.idPaciente = p.id;
+              t.estatus = 'P';
+              obtenerDia(t.dia, dia);
+              obtenerMes(t.mes, mes);
+              cout << "Turno disponible " << endl;
+              cout << "Medico: " << m.apellido << ", " << m.nombre << endl;
+              cout << dia << " " << t.dia << " de " << mes << " a las "
+                   << t.hora << " hs" << endl;
+              cout << "¿Desea confirmar el turno?" << endl;
+              cout << "Confirmar (1)" << endl;
+              cout << "Cancelar (2)" << endl;
+              cout << "Ingrese una opción: ";
+              while (confirmacion != 1 && confirmacion != 2) {
+                cin >> confirmacion;
+              }
+              if (confirmacion == 1) {
+                insertarTurnoEnArchivo(t, idMedico);
               }
             }
           }
@@ -518,42 +675,44 @@ void altaTurno(nodoLT *&listaLT, nodoLM *listaM, nodoLP *listaP,
 }
 
 void actualizarStatus(nodoLT *&listaLT, int idTurno, int IDmedico) {
-  nodoLT * listaAux = listaLT;
+  nodoLT *listaAux = listaLT;
   char newStat;
-  cout<< "Seleccione el nuevo status: "<<endl;
-  cout<< "Pendiente (P) "<<endl;
-  cout<< "Cancelado (C) "<<endl;
-  cout<< "Atendido (A) "<<endl;
-  cout<< "No atendido pero sin cancelar (X) "<<endl;
-  cin>>newStat;
-    while(listaAux != NULL && listaAux->info.idMedico != IDmedico){
+  cout << "Seleccione el nuevo status: " << endl;
+  cout << "Pendiente (P) " << endl;
+  cout << "Cancelado (C) " << endl;
+  cout << "Atendido (A) " << endl;
+  cout << "No atendido pero sin cancelar (X) " << endl;
+  cin >> newStat;
+  while (listaAux != NULL && listaAux->info.idMedico != IDmedico) {
     listaAux = listaAux->sgte;
   }
-  if (listaAux != NULL && listaAux->info.idMedico == IDmedico){
-    while (listaAux->info.sublista != NULL && listaAux->info.sublista->info.id != idTurno){
+  if (listaAux != NULL && listaAux->info.idMedico == IDmedico) {
+    while (listaAux->info.sublista != NULL &&
+           listaAux->info.sublista->info.id != idTurno) {
       listaAux->info.sublista = listaAux->info.sublista->sgte;
     }
-  if(listaAux->info.sublista != NULL && listaAux->info.sublista->info.id == idTurno){
-     listaAux->info.sublista->info.estatus = newStat;
-     cout<<"El status se actualizo con exito"<<endl;
-    }else{
-      cout<<"El id de turno es erroneo o el turno no existe"<<endl;
+    if (listaAux->info.sublista != NULL &&
+        listaAux->info.sublista->info.id == idTurno) {
+      listaAux->info.sublista->info.estatus = newStat;
+      cout << "El status se actualizo con exito" << endl;
+    } else {
+      cout << "El id de turno es erroneo o el turno no existe" << endl;
     }
-  }else{
-    cout<<"El id de medico es erroneo"<<endl;
+  } else {
+    cout << "El id de medico es erroneo" << endl;
   }
 }
 
-void turnosPendientes(nodoLT * listaLT, int idMedico, int mes) {
-  nodoLT * listAux = listaLT;
-  //listar dia hora mes status
-  cout<<"Los turnos del mes " << mes << "son: "<<endl;
-
+void turnosPendientes(nodoLT *listaLT, int idMedico, int mes) {
+  nodoLT *listAux = listaLT;
+  // listar dia hora mes status
+  cout << "Los turnos del mes " << mes << "son: " << endl;
 }
 
 void atencionesEfectivas(nodoLM *listaM, nodoT *&listaT, int mes) {}
 
-void cancelacionesPorMes(nodoLM *listaM, nodoT *&listaT, nodoLP *&listaP, int mes) {}
+void cancelacionesPorMes(nodoLM *listaM, nodoT *&listaT, nodoLP *&listaP,
+                         int mes) {}
 
 // FUNCIONES DE NODOS
 void pushPaciente(nodoLP *&lista, Paciente info) {
@@ -581,6 +740,18 @@ void pushListaTurno(nodoLT *&lista, infoT info) {
   lista = lt;
 }
 
+infoT crearListaTurnos(int idMedico) {
+  infoT i;
+  i.idMedico = idMedico;
+  i.sublista = NULL;
+  FILE *f = fopen("turnos.bin", "rb+");
+  int id = cantRegTurnos(f);
+  fseek(f, id * sizeof(infoT), SEEK_SET);
+  fwrite(&i, sizeof(infoT), 1, f);
+  fclose(f);
+  return i;
+}
+
 nodoLP *buscarPaciente(nodoLP *lista, char dni[]) {
   nodoLP *listaP = lista;
   while (listaP != NULL && strcmp(dni, listaP->info.dni) != 0) {
@@ -599,7 +770,7 @@ nodoLM *buscarMedico(nodoLM *lista, int id) {
 
 nodoT *buscarListaTurnos(nodoLT *lista, int idMedico) {
   nodoLT *listaT = lista;
-  while (lista != NULL && listaT->info.idMedico != idMedico) {
+  while (listaT != NULL && listaT->info.idMedico != idMedico) {
     listaT = listaT->sgte;
   }
   return listaT->info.sublista;
