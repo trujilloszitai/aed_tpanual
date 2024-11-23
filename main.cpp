@@ -86,6 +86,8 @@ void obtenerDia(int, char[]);
 void obtenerMes(int, char[]);
 int elegirEspecialidad(char[][50 + 1]);
 void actualizarStatus(nodoLT*&, int, int);
+void turnosPendientes(nodoLT*, int, int);
+void atencionesEfectivas(nodoLT*, int);
 
 int main() {
   char especialidades[20][50 + 1] = {"Cardiologia",      "Pediatria",
@@ -167,6 +169,11 @@ int main() {
           case 3:
             break;
           case 4:
+          //atenciones efectivas 
+            int mes;
+            cout<<"Ingrese el mes del que quiere ver las atenciones efectivas del 1 al 12, siendo 1 el mes Enero: ";
+            cin>>mes;
+            atencionesEfectivas(ListaLT, mes);
             break;
           }
           break;
@@ -197,7 +204,13 @@ int main() {
           actualizarStatus(ListaLT,idTurno, idMedico);
             break;
           case 3:
-          //turnos pendientes
+          int mesIng;
+          int idMed;
+          cout<<"Ingresar id del medico: ";
+          cin>>idMed;
+          cout<<"Ingresar mes del 1 al 12, siendo 1 el mes Enero: ";
+          cin>>mesIng;
+          turnosPendientes(ListaLT, idMed, mesIng);
             break;
           case 4:
             //ver cancelaciones
@@ -544,16 +557,45 @@ void actualizarStatus(nodoLT *&listaLT, int idTurno, int IDmedico) {
   }
 }
 
-void turnosPendientes(nodoLT * listaLT, int idMedico, int mes) {
-  nodoLT * listAux = listaLT;
+void turnosPendientes(nodoLT * listaLT, int idMedico, int mesL) {
+  nodoLT * listaAux = listaLT;
+  char mesAux[15+1];
+  obtenerMes(mesL, mesAux);
   //listar dia hora mes status
-  cout<<"Los turnos del mes " << mes << "son: "<<endl;
-
+  cout<<"Los turnos del mes " << mesAux << " son: "<<endl;
+  while(listaAux != NULL && listaAux->info.idMedico != idMedico){
+    listaAux = listaAux->sgte;
+  }
+  char diaAux[15+1];
+  while(listaAux != NULL && listaAux->info.sublista != NULL){
+    if(listaAux->info.sublista->info.mes == mesL){
+      obtenerDia(listaAux->info.sublista->info.dia, diaAux);
+      cout<<"Turno dia: "<< diaAux << " | Hora: "<< listaAux->info.sublista->info.hora << "hs | Estado: "<<listaAux->info.sublista->info.estatus<<endl;
+    }
+    listaAux->info.sublista = listaAux->info.sublista->sgte;
+  }
 }
 
-void atencionesEfectivas(nodoLM *listaM, nodoT *&listaT, int mes) {}
+void atencionesEfectivas(nodoLT * listaLT, int mesL) {
+  nodoLT * listaAux = listaLT;
+  char mesAux[15+1];
+  obtenerMes(mesL, mesAux);
+  int contAtEf = 0;
+  while(listaAux != NULL){
+    while(listaAux != NULL && listaAux->info.sublista != NULL){
+        if(listaAux->info.sublista->info.mes == mesL){
+          contAtEf++;
+        }
+      listaAux->info.sublista = listaAux->info.sublista->sgte;
+    }
+    listaAux = listaAux->sgte;
+  }
+  cout<<"La cantidad de atenciones efectivas durante el mes de "<< mesAux << " fueron " << contAtEf << endl;
+}
 
-void cancelacionesPorMes(nodoLM *listaM, nodoT *&listaT, nodoLP *&listaP, int mes) {}
+void cancelacionesPorMes(nodoLM *listaM, nodoLT *&listaT, nodoLP *&listaP, int mes) {
+
+}
 
 // FUNCIONES DE NODOS
 void pushPaciente(nodoLP *&lista, Paciente info) {
@@ -646,5 +688,5 @@ void obtenerMes(int mes, char txt[]) {
                             "Septiembre", "Octubre", "Noviembre", "Diciembre"};
   if (mes > 12 || mes < 1)
     mes = 1;
-  strcpy(txt, meses[mes]);
+  strcpy(txt, meses[mes - 1]);
 }
