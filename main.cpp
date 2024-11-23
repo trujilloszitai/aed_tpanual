@@ -70,6 +70,7 @@ void altaTurno(nodoLT *&, nodoLM *, nodoLP *, char[][50 + 1]);
 void pushMedico(nodoLM *&, Medico);
 void pushTurno(nodoT *&, Turno);
 void pushListaTurno(nodoLT *&, infoT);
+nodoLP *buscarPacienteDni(nodoLP *, char[]);
 infoT crearListaTurnos(int);
 nodoLP *buscarPaciente(nodoLP *, char[]);
 nodoLM *buscarMedico(nodoLM *, int);
@@ -90,9 +91,11 @@ void obtenerDia(int, char[]);
 void obtenerMes(int, char[]);
 int elegirEspecialidad(char[][50 + 1]);
 void actualizarStatus(nodoLT *&, int, int);
-void actualizarStatus(nodoLT*&, int, int);
 void turnosPendientes(nodoLT*, int, int);
 void atencionesEfectivas(nodoLT*, int);
+void obtenerEspecialidad(int , char[]);
+nodoLP * buscarPacienteId(nodoLP*, int);
+void cancelacionesPorMes(nodoLM *, nodoLT *, nodoLP *, int);
 
 int main() {
   char especialidades[20][50 + 1] = {"Cardiologia",      "Pediatria",
@@ -209,7 +212,6 @@ int main() {
             actualizarStatus(ListaLT, idTurno, idMedico);
             break;
           case 3:
-            // turnos pendientes
           int mesIng;
           int idMed;
           cout<<"Ingresar id del medico: ";
@@ -219,7 +221,10 @@ int main() {
           turnosPendientes(ListaLT, idMed, mesIng);
             break;
           case 4:
-            // ver cancelaciones
+            int mesCan;
+            cout<<"Ingrese el mes del que desea ver las cancelaciones, del 1 al 12, siendo 1 el mes enero: ";
+            cin>>mesCan;
+            cancelacionesPorMes(ListaDeM, ListaLT, ListaDeP, mesCan);
             break;
           }
           break;
@@ -421,7 +426,7 @@ void insertarTurnoEnArchivo(Turno nuevoTurno, int idMedico) {
   }
 
   // Actualizar el archivo
-  guardarLista(lista);
+  guardarListaTurnos(lista);
 
   // Liberar memoria de la lista en memoria
   nodoLT *temp;
@@ -533,8 +538,7 @@ int elegirMedico(nodoLM *lista) {
   return idElegido;
 }
 
-void altaMedico(nodoLM *&listaM, nodoLT *&listaLT,
-                char especialidades[][50 + 1]) {
+void altaMedico(nodoLM *&listaM, nodoLT *&listaLT, char especialidades[][50 + 1]) {
   Medico newMed;
   FILE *f = fopen("medicos.bin", "rb+");
   int id = cantRegMedicos(f) == 0 ? 1 : cantRegMedicos(f);
@@ -620,7 +624,7 @@ void altaTurno(nodoLT *&listaLT, nodoLM *listaM, nodoLP *listaP,
     while (np == NULL) {
       cout << "Ingrese el DNI del paciente: ";
       cin >> dniPaciente;
-      np = buscarPaciente(listaP, dniPaciente);
+      np = buscarPacienteDni(listaP, dniPaciente);
       if (np == NULL)
         cout << "No se ha encontrado al paciente" << endl;
       else {
@@ -749,10 +753,33 @@ void atencionesEfectivas(nodoLT * listaLT, int mesL) {
   cout<<"La cantidad de atenciones efectivas durante el mes de "<< mesAux << " fueron " << contAtEf << endl;
 }
 
-void cancelacionesPorMes(nodoLM *listaM, nodoT *&listaT, nodoLP *&listaP,
-                         int mes) {}
-void cancelacionesPorMes(nodoLM *listaM, nodoLT *&listaT, nodoLP *&listaP, int mes) {
-
+void cancelacionesPorMes(nodoLM * listaM, nodoLT * listaT, nodoLP * listaP, int mesL) {
+  nodoLM * listaMaux = listaM;
+  nodoLT * listaLTaux = listaT;
+  nodoLP * listaPaux = listaP;
+  char mesAux[15+1];
+  char diaAux[15+1];
+  obtenerMes(mesL, mesAux);
+  //nombre del paciente, nombre del medico, especialidad, dia de atencion
+  nodoLM * medico;
+  char especialidad[30+1];
+  char nomPac[20+1];
+  int diaDeAt = 0;
+  cout<<"Las cancelaciones del mes de "<< mesAux << " son: " << endl;
+  while(listaLTaux != NULL){
+    while(listaLTaux != NULL && listaLTaux->info.sublista != NULL){
+        if(listaLTaux->info.sublista->info.mes == mesL && listaLTaux->info.sublista->info.estatus == 'C'){
+          strcpy(nomPac, buscarPacienteId(listaP, listaLTaux->info.sublista->info.idPaciente)->info.nombre);
+          medico = buscarMedico(listaM, listaLTaux->info.idMedico);
+          obtenerEspecialidad(medico->info.idEspecialidad, especialidad);
+          diaDeAt = listaLTaux->info.sublista->info.dia;
+          obtenerDia(diaDeAt, diaAux);
+          cout<<"Dia "<< diaAux <<" "<< diaDeAt << " | Paciente: "<< nomPac << " | Medico: "<< medico->info.nombre <<" | Especialidad: "<< especialidad << endl;
+        }
+      listaLTaux->info.sublista = listaLTaux->info.sublista->sgte;
+    }
+    listaLTaux = listaLTaux->sgte;
+  }
 }
 
 // FUNCIONES DE NODOS
@@ -785,17 +812,25 @@ infoT crearListaTurnos(int idMedico) {
   infoT i;
   i.idMedico = idMedico;
   i.sublista = NULL;
-  FILE *f = fopen("turnos.bin", "rb+");
+  FILE * f = fopen("turnos.bin", "rb+");
   int id = cantRegTurnos(f);
-  fseek(f, id * sizeof(infoT), SEEK_SET);
+  fseek(f, id*sizeof(infoT), SEEK_SET);
   fwrite(&i, sizeof(infoT), 1, f);
   fclose(f);
   return i;
 }
 
-nodoLP *buscarPaciente(nodoLP *lista, char dni[]) {
+nodoLP *buscarPacienteDni(nodoLP *lista, char dni[]) {
   nodoLP *listaP = lista;
   while (listaP != NULL && strcmp(dni, listaP->info.dni) != 0) {
+    listaP = listaP->sgte;
+  }
+  return listaP;
+}
+
+nodoLP * buscarPacienteId(nodoLP *lista, int id) {
+  nodoLP *listaP = lista;
+  while (listaP != NULL && id != listaP->info.id) {
     listaP = listaP->sgte;
   }
   return listaP;
@@ -842,6 +877,22 @@ nodoLM *filtrarMedicos(nodoLM *lista, int idEspecialidad) {
     listaM = listaM->sgte;
   }
   return especialistas;
+}
+
+void obtenerEspecialidad(int idEsp, char txt[]){
+    char especialidades[20][50 + 1] = {"Cardiologia",      "Pediatria",
+                                     "Ginecologia",      "Dermatologia",
+                                     "Neurologia",       "Oftalmologia",
+                                     "Traumatologia",    "Urologia",
+                                     "Oncologia",        "Psiquiatria",
+                                     "Endocrinologia",   "Gastroenterologia",
+                                     "Neumologia",       "Otorrinolaringologia",
+                                     "Reumatologia",     "Cirugia General",
+                                     "Medicina Interna", "Nefrologia",
+                                     "Hematologia",      "Medicina Familiar"};
+ if (idEsp > 20 || idEsp < 1)
+    idEsp = 1;
+  strcpy(txt, especialidades[idEsp - 1]);
 }
 
 void obtenerDia(int dia, char txt[]) {
