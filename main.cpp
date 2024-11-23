@@ -79,9 +79,8 @@ int turnoDisponible(nodoT *, Turno);
 nodoLP *leerArchivoPacientes(FILE *);
 nodoLM *leerArchivoMedicos(FILE *);
 nodoLT *leerArchivoTurnos();
-nodoLT *guardarListaTurnos();
 nodoT *insertarTurnoOrdenado(nodoT *, Turno);
-void guardarLista(nodoLT *lista);
+void guardarListaTurnos(nodoLT *lista);
 void insertarTurnoEnArchivo(Turno, int);
 void cargarArchivoPacientes(FILE *, Paciente[]);
 void cargarArchivoMedicos(FILE *, Medico[]);
@@ -431,7 +430,7 @@ void insertarTurnoEnArchivo(Turno nuevoTurno, int idMedico) {
   }
 
   // Actualizar el archivo
-  guardarLista(lista);
+  guardarListaTurnos(lista);
 
   // Liberar memoria de la lista en memoria
   nodoLT *temp;
@@ -543,8 +542,7 @@ int elegirMedico(nodoLM *lista) {
   return idElegido;
 }
 
-void altaMedico(nodoLM *&listaM, nodoLT *&listaLT,
-                char especialidades[][50 + 1]) {
+void altaMedico(nodoLM *&listaM, nodoLT *&listaLT, char especialidades[][50 + 1]) {
   Medico newMed;
   FILE *f = fopen("medicos.bin", "rb+");
   int id = cantRegMedicos(f) == 0 ? 1 : cantRegMedicos(f);
@@ -813,6 +811,18 @@ void pushListaTurno(nodoLT *&lista, infoT info) {
   lt->info = info;
   lt->sgte = lista;
   lista = lt;
+}
+
+infoT crearListaTurnos(int idMedico) {
+  infoT i;
+  i.idMedico = idMedico;
+  i.sublista = NULL;
+  FILE * f = fopen("turnos.bin", "rb+");
+  int id = cantRegTurnos(f);
+  fseek(f, id*sizeof(infoT), SEEK_SET);
+  fwrite(&i, sizeof(infoT), 1, f);
+  fclose(f);
+  return i;
 }
 
 nodoLP *buscarPacienteDni(nodoLP *lista, char dni[]) {
