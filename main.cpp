@@ -65,17 +65,25 @@ struct nodoLT {
 
 void altaPaciente(nodoLP *&);
 void pushPaciente(nodoLP *&, Paciente);
-void altaMedico(nodoLM *&, char[][50+1]);
+void altaMedico(nodoLM *&, char[][50 + 1]);
+void altaTurno(nodoLT *&, nodoLM *, nodoLP *, char[][50 + 1]);
 void pushMedico(nodoLM *&, Medico);
 void pushTurno(nodoT *&, Turno);
 void pushListaTurno(nodoLT *&, infoT);
 nodoLP *buscarPaciente(nodoLP *, char[]);
+nodoLM *buscarMedico(nodoLM *, int);
+nodoT *buscarListaTurnos(nodoLT *, int);
+int turnoDisponible(nodoT *, Turno);
 nodoLP *leerArchivoPacientes(FILE *);
 nodoLM *leerArchivoMedicos(FILE *);
 nodoLT *leerArchivoTurnos(FILE *);
 void cargarArchivoPacientes(FILE *, Paciente[]);
 void cargarArchivoMedicos(FILE *, Medico[]);
 void cargarArchivoTurnos(FILE *, infoT[]);
+int elegirEspecialidad(char[][50 + 1], int);
+nodoLM *filtrarMedicos(nodoLM *, int);
+void obtenerDia(int, char[]);
+void obtenerMes(int, char[]);
 int elegirEspecialidad(char[][50 + 1]);
 void actualizarStatus(nodoLT*&, int, int);
 
@@ -141,10 +149,10 @@ int main() {
             altaPaciente(ListaDeP);
             break;
           case 2:
-          //buscar paciente
+            // buscar paciente
             break;
           case 3:
-          //listar pacientes
+            // listar pacientes
             break;
           }
           break;
@@ -152,7 +160,7 @@ int main() {
           // Medicos
           switch (accion) {
           case 1:
-          altaMedico(ListaDeM, especialidades);
+            altaMedico(ListaDeM, especialidades);
             break;
           case 2:
             break;
@@ -175,13 +183,14 @@ int main() {
           // Turnos
           switch (accion) {
           case 1:
+            altaTurno(ListaLT, ListaDeM, ListaDeP, especialidades);
           //nuevo turno
             break;
           case 2:
           //actualizar status
           int idMedico;
           int idTurno;
-          cout<<"Indique el id del medico: "; 
+          cout<<"Indique el id del medico: ";
           cin>>idMedico;
           cout<<"Indique el id del turno: ";
           cin>>idTurno;
@@ -289,7 +298,7 @@ int cantRegTurnos(FILE *&f) {
 void altaPaciente(nodoLP *&lista) {
   Paciente nuevoPaciente;
   FILE *f = fopen("pacientes.bin", "rb+");
-  int id = cantRegPacientes(f) + 1;
+  int id = cantRegPacientes(f);
   cout << "Nuevo paciente (" << id << ")" << endl;
   cout << "Nombre: ";
   cin >> nuevoPaciente.nombre;
@@ -308,77 +317,102 @@ void altaPaciente(nodoLP *&lista) {
 }
 
 // Retorna la posicion de la especialidad elegida
-int elegirEspecialidad(char especialidades[][50 + 1]) {
+int elegirEspecialidad(char especialidades[][50 + 1], int N) {
   int i, idEspecialidad;
   i = idEspecialidad = 0;
   cout << "Especialidades disponibles" << endl;
-  for (; i < 5; i++) {
+  for (; i < N; i++) {
     cout << especialidades[i] << " (" << i + 1 << ") | ";
-    cout << especialidades[i + 5] << " (" << i + 5 + 1 << ") | ";
-    cout << especialidades[i + 10] << " (" << i + 10 + 1 << ") | ";
-    cout << especialidades[i + 15] << " (" << i + 15 + 1 << ") | " << endl;
   }
+  cout << endl;
 
-  while(idEspecialidad < 1 || idEspecialidad > 20) {
-      cout << "Elija la especialidad:";
-      cin >> idEspecialidad;
+  while (idEspecialidad < 1 || idEspecialidad > 20) {
+    cout << "Elija la especialidad:";
+    cin >> idEspecialidad;
   }
 
   return idEspecialidad;
 }
 
-void altaMedico(nodoLM *&lista, char especialidades[][50+1]){
-Medico newMed;
-FILE * f = fopen("medicos.bin", "rb+");
-int id = cantRegMedicos(f);
-cout << "Nuevo medico (" << id << ")" << endl;
-cout << "Nombre: ";
-cin >> newMed.nombre;
-cout << "Apellido: ";
-cin >> newMed.apellido;
-cout << "Numero de matricula: " << endl;
-cin >> newMed.matricula;
-newMed.idEspecialidad = elegirEspecialidad(especialidades);
-cout << "Dias en los que atiende (puede seleccionar mas de 1): "<< endl;
-int i = 0;
-int dia = 1;
-while(dia != 0 && i < 7){
-  cout<<"Domingo (1)"<< endl;
-  cout<<"Lunes (2)"<< endl;
-  cout<<"Martes (3)"<< endl;
-  cout<<"Miercoles (4)"<< endl;
-  cout<<"Jueves (5)"<< endl;
-  cout<<"Viernes (6)"<< endl;
-  cout<<"Sabado (7)"<< endl;
-  cout<<"Listo (0)"<<endl;
-  cin>>dia;
-  newMed.diasDeAtencion[i] = dia;
-  i++;
-  if(dia == 0 && newMed.diasDeAtencion[0] == 0){
-    cout << "Ingrse al menos 1 dia: "<<endl;
-    i = 0;
-    dia = 1;
+int elegirMedico(nodoLM *lista) {
+  nodoLM *listaM = lista;
+  int idElegido = 0;
+  int i = 0;
+
+  if (listaM == NULL){
+    return -1;
   }
+  cout << "Médicos disponibles" << endl;
+  while (listaM != NULL) {
+    Medico m = listaM->info;
+    cout << m.apellido << ", " << m.nombre << " (" << m.id << ")" << endl;
+    listaM = listaM->sgte;
+    i++;
+  }
+
+  while (idElegido < 1 || idElegido > i + 1) {
+    cout << "Elija el médico deseado: ";
+    cin >> idElegido;
+    if (idElegido < 1 || idElegido > i + 1)
+      cout << "Ingrese un id válido" << endl;
+  }
+
+  return idElegido;
 }
-cout<<"Ingrese HORA de comienzo de atencion (formato 24hs): "<<endl;
-cin>>newMed.rangoHorario[0];
-cout<<"Ingrese HORA de finalizacion de atencion: "<<endl;
-cin>>newMed.rangoHorario[1];
-int idDurCons;
-cout<<"Ingrese el tiempo que duran sus consultas: "<<endl;
-cout<<"15 minutos (1)"<<endl;
-cout<<"30 minutos (2)"<<endl;
-cout<<"45 minutos (3)"<<endl;
-cout<<"60 minutos (4)"<<endl;
-cin>>idDurCons;
-if(idDurCons == 1){
-  newMed.tiempoDeConsulta = 15;
-  } else if(idDurCons == 2){
-  newMed.tiempoDeConsulta = 30;
-  }else if(idDurCons == 3){
-  newMed.tiempoDeConsulta = 45;
-  }else if(idDurCons == 4){
-  newMed.tiempoDeConsulta = 60;
+
+void altaMedico(nodoLM *&lista, char especialidades[][50 + 1]) {
+  Medico newMed;
+  FILE *f = fopen("medicos.bin", "rb+");
+  int id = cantRegMedicos(f) == 0 ? 1 : cantRegMedicos(f);
+  cout << "Nuevo medico (" << id << ")" << endl;
+  newMed.id = id;
+  cout << "Nombre: ";
+  cin >> newMed.nombre;
+  cout << "Apellido: ";
+  cin >> newMed.apellido;
+  cout << "Numero de matricula: " << endl;
+  cin >> newMed.matricula;
+  newMed.idEspecialidad = elegirEspecialidad(especialidades, 20);
+  cout << "Dias en los que atiende (puede seleccionar mas de 1): " << endl;
+  int i = 0;
+  int dia = 1;
+  while (dia != 0 && i < 7) {
+    cout << "Domingo (1)" << endl;
+    cout << "Lunes (2)" << endl;
+    cout << "Martes (3)" << endl;
+    cout << "Miercoles (4)" << endl;
+    cout << "Jueves (5)" << endl;
+    cout << "Viernes (6)" << endl;
+    cout << "Sabado (7)" << endl;
+    cout << "Listo (0)" << endl;
+    cin >> dia;
+    newMed.diasDeAtencion[i] = dia;
+    i++;
+    if (dia == 0 && newMed.diasDeAtencion[0] == 0) {
+      cout << "Ingrse al menos 1 dia: " << endl;
+      i = 0;
+      dia = 1;
+    }
+  }
+  cout << "Ingrese HORA de comienzo de atencion (formato 24hs): " << endl;
+  cin >> newMed.rangoHorario[0];
+  cout << "Ingrese HORA de finalizacion de atencion: " << endl;
+  cin >> newMed.rangoHorario[1];
+  int idDurCons;
+  cout << "Ingrese el tiempo que duran sus consultas: " << endl;
+  cout << "15 minutos (1)" << endl;
+  cout << "30 minutos (2)" << endl;
+  cout << "45 minutos (3)" << endl;
+  cout << "60 minutos (4)" << endl;
+  cin >> idDurCons;
+  if (idDurCons == 1) {
+    newMed.tiempoDeConsulta = 15;
+  } else if (idDurCons == 2) {
+    newMed.tiempoDeConsulta = 30;
+  } else if (idDurCons == 3) {
+    newMed.tiempoDeConsulta = 45;
+  } else if (idDurCons == 4) {
+    newMed.tiempoDeConsulta = 60;
   }
   pushMedico(lista, newMed);
   fseek(f, id * sizeof(Medico), SEEK_SET);
@@ -386,12 +420,13 @@ if(idDurCons == 1){
   fclose(f);
 }
 
-
-void altaTurno(nodoLT *&listaT, nodoLP *&listaP, char especialidades[][50+1]) {
+void altaTurno(nodoLT *&listaLT, nodoLM *listaM, nodoLP *listaP,
+               char especialidades[][50 + 1]) {
   int opcion = 0;
   char dniPaciente[8 + 1] = {""};
   int idEspecialidad;
-  nodoLP *p = NULL;
+  int idMedico;
+  nodoLP *np = NULL;
   cout << "Turnos - Alta de Turno" << endl;
   while (opcion != 1 && opcion != 2) {
     cout << "¿El solicitante ya es paciente de la clinica?" << endl;
@@ -403,19 +438,83 @@ void altaTurno(nodoLT *&listaT, nodoLP *&listaP, char especialidades[][50+1]) {
     cout << "Se procedera a crear un nuevo paciente" << endl;
     altaPaciente(listaP);
     strcpy(dniPaciente, listaP->info.dni);
-    p = listaP;
+    np = listaP;
   }
   if (opcion == 1) {
-    while (p == NULL) {
+    while (np == NULL) {
       cout << "Ingrese el DNI del paciente: ";
       cin >> dniPaciente;
-      p = buscarPaciente(listaP, dniPaciente);
-      if (p == NULL)
+      np = buscarPaciente(listaP, dniPaciente);
+      if (np == NULL)
         cout << "No se ha encontrado al paciente" << endl;
+      else {
+        Paciente p = np->info;
+        idEspecialidad = elegirEspecialidad(especialidades, 20);
+        nodoLM *medicosDeEspecialidad = filtrarMedicos(listaM, idEspecialidad);
+        idMedico = elegirMedico(medicosDeEspecialidad);
+        if (idMedico == -1) {
+          cout << "No hay medicos disponibles en este momento" << endl;
+        } else {
+          nodoT *listaTurnos = buscarListaTurnos(listaLT, idMedico);
+          if (listaTurnos == NULL)
+            cout << "No hay turnos disponibles para este medico.";
+          else {
+            Turno t;
+            int disponibilidad;
+            cout << "Solicitando turno turno..." << endl;
+            cout << "Mes: ";
+            cin >> t.mes;
+            cout << "Dia: ";
+            cin >> t.dia;
+            cout << "Hora: ";
+            cin >> t.hora;
+            disponibilidad = turnoDisponible(listaTurnos, t);
+            switch (disponibilidad) {
+            case -1:
+              cout << "Ya tiene un turno solicitado para esta fecha" << endl;
+              break;
+            case 0:
+              cout << "No hay un turno disponible para esta fecha" << endl;
+            case 1:
+              nodoLM *nm = buscarMedico(listaM, idMedico);
+              if (nm == NULL)
+                cout << "Se ha producido un error inesperado. Intentelo mas "
+                        "tarde";
+              else {
+                Medico m = nm->info;
+                char dia[15 + 1];
+                char mes[15 + 1];
+                int confirmacion = 0;
+                t.idPaciente = p.id;
+                t.estatus = 'P';
+                obtenerDia(t.dia, dia);
+                obtenerMes(t.mes, mes);
+                cout << "Turno disponible " << endl;
+                cout << "Medico: " << m.apellido << ", " << m.nombre << endl;
+                cout << dia << " " << t.dia << " de " << mes << " a las "
+                     << t.hora << " hs" << endl;
+                cout << "¿Desea confirmar el turno?" << endl;
+                cout << "Confirmar (1)" << endl;
+                cout << "Cancelar (2)" << endl;
+                cout << "Ingrese una opción: ";
+                while (opcion != 1 && opcion != 2) {
+                  cin >> confirmacion;
+                }
+                if (opcion == 1) {
+                  pushTurno(listaTurnos, t);
+                  FILE *f = fopen("turnos.bin", "rb+");
+                  int id = cantRegTurnos(f);
+                  fseek(f, id * sizeof(infoT), SEEK_SET);
+                  fwrite(&t, sizeof(infoT), 1, f);
+                  fclose(f);
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
-
-  idEspecialidad = elegirEspecialidad(especialidades);
 }
 
 void actualizarStatus(nodoLT *&listaLT, int idTurno, int IDmedico) {
@@ -487,18 +586,65 @@ nodoLP *buscarPaciente(nodoLP *lista, char dni[]) {
   while (listaP != NULL && strcmp(dni, listaP->info.dni) != 0) {
     listaP = listaP->sgte;
   }
-  if (strcmp(dni, listaP->info.dni) == 0)
-    return listaP;
-  return NULL;
+  return listaP;
 }
 
-nodoLM *filtrarMedicos(nodoLM* lista, int idEspecialidad) {
-    nodoLM* listaM = lista;
-    nodoLM* especialistas = NULL;
-    while(lista != NULL) {
-        Medico m = listaM->info;
-        if(m.idEspecialidad == idEspecialidad) pushMedico(especialistas, m);
-        listaM = listaM->sgte;
+nodoLM *buscarMedico(nodoLM *lista, int id) {
+  nodoLM *listaM = lista;
+  while (listaM != NULL && id != listaM->info.id) {
+    listaM = listaM->sgte;
+  }
+  return listaM;
+}
+
+nodoT *buscarListaTurnos(nodoLT *lista, int idMedico) {
+  nodoLT *listaT = lista;
+  while (lista != NULL && listaT->info.idMedico != idMedico) {
+    listaT = listaT->sgte;
+  }
+  return listaT->info.sublista;
+}
+
+int turnoDisponible(nodoT *lista, Turno turno) {
+  bool disponible = false;
+  while (lista != NULL) {
+    Turno t = lista->info;
+    if (t.mes == turno.mes && t.dia == turno.dia && t.hora == turno.hora) {
+      if (t.idPaciente == turno.idPaciente)
+        return -1;
+      return 0;
     }
-    return especialistas;
+    lista = lista->sgte;
+  }
+  return 1;
+}
+
+nodoLM *filtrarMedicos(nodoLM *lista, int idEspecialidad) {
+  nodoLM *listaM = lista;
+  nodoLM *especialistas = NULL;
+  while (listaM != NULL) {
+    Medico m = listaM->info;
+    cout << m.id << endl;
+    if (m.idEspecialidad == idEspecialidad)
+      pushMedico(especialistas, m);
+    listaM = listaM->sgte;
+  }
+  return especialistas;
+}
+
+void obtenerDia(int dia, char txt[]) {
+  char dias[7][15 + 1] = {"Domingo", "Lunes",   "Martes", "Miercoles",
+                          "Jueves",  "Viernes", "Sabado"};
+  if (dia > 7 || dia < 1)
+    dia = 1;
+  strcpy(txt, dias[dia % 7] - 1);
+}
+
+void obtenerMes(int mes, char txt[]) {
+  char meses[12][15 + 1] = {"Enero",      "Febrero", "Marzo",     "Abril",
+                            "Mayo",       "Junio",   "Julio",     "Agosto",
+                            "Septiembre", "Octubre", "Noviembre", "Diciembre"};
+  if (mes > 12 || mes < 1)
+    mes = 1;
+  strcpy(txt, meses[mes]);
 }
