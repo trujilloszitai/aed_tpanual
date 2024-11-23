@@ -78,9 +78,8 @@ int turnoDisponible(nodoT *, Turno);
 nodoLP *leerArchivoPacientes(FILE *);
 nodoLM *leerArchivoMedicos(FILE *);
 nodoLT *leerArchivoTurnos();
-nodoLT *guardarListaTurnos();
 nodoT *insertarTurnoOrdenado(nodoT *, Turno);
-void guardarLista(nodoLT *lista);
+void guardarListaTurnos(nodoLT *lista);
 void insertarTurnoEnArchivo(Turno, int);
 void cargarArchivoPacientes(FILE *, Paciente[]);
 void cargarArchivoMedicos(FILE *, Medico[]);
@@ -90,13 +89,10 @@ nodoLM *filtrarMedicos(nodoLM *, int);
 void obtenerDia(int, char[]);
 void obtenerMes(int, char[]);
 int elegirEspecialidad(char[][50 + 1]);
-<<<<<<< HEAD
 void actualizarStatus(nodoLT *&, int, int);
-=======
 void actualizarStatus(nodoLT*&, int, int);
 void turnosPendientes(nodoLT*, int, int);
 void atencionesEfectivas(nodoLT*, int);
->>>>>>> 981b901103fc4842b093a49f975c96596124e77b
 
 int main() {
   char especialidades[20][50 + 1] = {"Cardiologia",      "Pediatria",
@@ -178,7 +174,7 @@ int main() {
           case 3:
             break;
           case 4:
-          //atenciones efectivas 
+          //atenciones efectivas
             int mes;
             cout<<"Ingrese el mes del que quiere ver las atenciones efectivas del 1 al 12, siendo 1 el mes Enero: ";
             cin>>mes;
@@ -213,9 +209,7 @@ int main() {
             actualizarStatus(ListaLT, idTurno, idMedico);
             break;
           case 3:
-<<<<<<< HEAD
             // turnos pendientes
-=======
           int mesIng;
           int idMed;
           cout<<"Ingresar id del medico: ";
@@ -223,7 +217,6 @@ int main() {
           cout<<"Ingresar mes del 1 al 12, siendo 1 el mes Enero: ";
           cin>>mesIng;
           turnosPendientes(ListaLT, idMed, mesIng);
->>>>>>> 981b901103fc4842b093a49f975c96596124e77b
             break;
           case 4:
             // ver cancelaciones
@@ -344,10 +337,6 @@ nodoLT *leerArchivoTurnos() {
 
 void guardarListaTurnos(nodoLT *lista) {
   FILE *fp = fopen("turnos.bin", "rb+");
-  if (fp == NULL) {
-    std::cerr << "Error al abrir el archivo." << std::endl;
-    return;
-  }
   // contar cantidad de nodos
   int cantidadNodos = 0;
   nodoLT *temp = lista;
@@ -724,12 +713,6 @@ void actualizarStatus(nodoLT *&listaLT, int idTurno, int IDmedico) {
   }
 }
 
-<<<<<<< HEAD
-void turnosPendientes(nodoLT *listaLT, int idMedico, int mes) {
-  nodoLT *listAux = listaLT;
-  // listar dia hora mes status
-  cout << "Los turnos del mes " << mes << "son: " << endl;
-=======
 void turnosPendientes(nodoLT * listaLT, int idMedico, int mesL) {
   nodoLT * listaAux = listaLT;
   char mesAux[15+1];
@@ -747,7 +730,6 @@ void turnosPendientes(nodoLT * listaLT, int idMedico, int mesL) {
     }
     listaAux->info.sublista = listaAux->info.sublista->sgte;
   }
->>>>>>> 981b901103fc4842b093a49f975c96596124e77b
 }
 
 void atencionesEfectivas(nodoLT * listaLT, int mesL) {
@@ -767,14 +749,11 @@ void atencionesEfectivas(nodoLT * listaLT, int mesL) {
   cout<<"La cantidad de atenciones efectivas durante el mes de "<< mesAux << " fueron " << contAtEf << endl;
 }
 
-<<<<<<< HEAD
 void cancelacionesPorMes(nodoLM *listaM, nodoT *&listaT, nodoLP *&listaP,
                          int mes) {}
-=======
 void cancelacionesPorMes(nodoLM *listaM, nodoLT *&listaT, nodoLP *&listaP, int mes) {
 
 }
->>>>>>> 981b901103fc4842b093a49f975c96596124e77b
 
 // FUNCIONES DE NODOS
 void pushPaciente(nodoLP *&lista, Paciente info) {
