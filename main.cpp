@@ -30,7 +30,7 @@ struct Especialidad {
 
 struct Turno {
   int id = 0;
-  float hora = 0;
+  int hora = 0;
   int dia = 0;
   int mes = 0;
   char estatus = 'P';
@@ -330,7 +330,7 @@ int elegirEspecialidad(char especialidades[][50 + 1]) {
 void altaMedico(nodoLM *&lista, char especialidades[][50+1]){
 Medico newMed;
 FILE * f = fopen("medicos.bin", "rb+");
-int id = cantRegMedicos(f) + 1;
+int id = cantRegMedicos(f);
 cout << "Nuevo medico (" << id << ")" << endl;
 cout << "Nombre: ";
 cin >> newMed.nombre;
@@ -445,12 +445,16 @@ void actualizarStatus(nodoLT *&listaLT, int idTurno, int IDmedico) {
   }
 }
 
-void turnosPendientes(nodoLM *listaM, nodoT *&listaT, int idMedico, int mes) {}
+void turnosPendientes(nodoLT * listaLT, int idMedico, int mes) {
+  nodoLT * listAux = listaLT;
+  //listar dia hora mes status
+  cout<<"Los turnos del mes " << mes << "son: "<<endl;
+
+}
 
 void atencionesEfectivas(nodoLM *listaM, nodoT *&listaT, int mes) {}
 
-void cancelacionesPorMes(nodoLM *listaM, nodoT *&listaT, nodoLP *&listaP,
-                         int mes) {}
+void cancelacionesPorMes(nodoLM *listaM, nodoT *&listaT, nodoLP *&listaP, int mes) {}
 
 // FUNCIONES DE NODOS
 void pushPaciente(nodoLP *&lista, Paciente info) {
