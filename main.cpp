@@ -73,12 +73,12 @@ struct nodoLT
 };
 
 void pushPaciente(nodoLP *&, Paciente);
+void pushMedico(nodoLM *&, Medico);
+void pushListaTurno(nodoLT *&, infoT);
+void pushTurno(nodoT *&, Turno);
 void altaPaciente(nodoLP *&);
 void altaMedico(nodoLM *&, nodoLT *&, char[][50 + 1]);
 void altaTurno(nodoLT *&, nodoLM *, nodoLP *, char[][50 + 1]);
-void pushMedico(nodoLM *&, Medico);
-void pushTurno(nodoT *&, Turno);
-void pushListaTurno(nodoLT *&, infoT);
 void guardarListaTurnos(nodoLT *lista);
 void insertarTurnoEnArchivo(Turno, int);
 void cargarArchivoPacientes(FILE *, Paciente[]);
@@ -94,7 +94,7 @@ void cancelacionesPorMes(nodoLM *, nodoLT *, nodoLP *, int);
 int elegirEspecialidad(char[][50 + 1], int);
 int turnoDisponible(nodoT *, Turno);
 int elegirEspecialidad(char[][50 + 1]);
-int contarTurnos(nodoT*);
+int contarTurnos(nodoT *);
 nodoLP *buscarPacienteDni(nodoLP *, char[]);
 nodoLP *buscarPacienteId(nodoLP *, int);
 nodoLP *leerArchivoPacientes(FILE *);
@@ -103,7 +103,6 @@ nodoLM *buscarMedico(nodoLM *, int);
 nodoLM *filtrarMedicos(nodoLM *, int);
 nodoLT *leerArchivoTurnos();
 nodoT *buscarListaTurnos(nodoLT *, int);
-nodoT *insertarTurnoOrdenado(nodoT *, Turno);
 nodoT *filtarTurnosPorEstatus(nodoT *, char);
 nodoT *filtarTurnosPorMes(nodoT *, int);
 infoT crearListaTurnos(int);
@@ -123,7 +122,6 @@ int main()
 
   FILE *fPacientes = fopen("pacientes.bin", "rb+");
   FILE *fMedicos = fopen("medicos.bin", "rb+");
-  FILE *fTurnos = fopen("turnos.bin", "rb+");
 
   nodoLM *ListaDeM = leerArchivoMedicos(fMedicos);
   nodoLP *ListaDeP = leerArchivoPacientes(fPacientes);
@@ -220,6 +218,7 @@ int main()
           {
           case 1:
             altaTurno(ListaLT, ListaDeM, ListaDeP, especialidades);
+            ListaLT = leerArchivoTurnos();
             // nuevo turno
             break;
           case 2:
@@ -241,14 +240,11 @@ int main()
           {
             int mesIng;
             int idMed;
-            char tecla;
             cout << "Ingresar id del medico: ";
             cin >> idMed;
             cout << "Ingresar mes del 1 al 12, siendo 1 el mes Enero: ";
             cin >> mesIng;
             turnosPendientes(ListaLT, idMed, mesIng);
-            cout << "Presiona una tecla ";
-            cin >> tecla;
           }
           break;
           case 4:
@@ -263,6 +259,9 @@ int main()
           break;
         }
         accion = 0;
+        char tecla;
+        cout << "Presiona una tecla para continuar" << endl;
+        cin >> tecla;
       }
     }
     else
@@ -416,29 +415,6 @@ void guardarListaTurnos(nodoLT *lista)
   fclose(fp);
 }
 
-// Insertar turno en la sublista
-nodoT *insertarTurnoOrdenado(nodoT *sublista, Turno t)
-{
-  nodoT *nuevo = new nodoT;
-  nuevo->info = t;
-  nuevo->sgte = NULL;
-  // determinar si la lista está vacía o si el turno a insertar debe ser el primero
-  if (sublista == NULL || sublista->info.id > t.id)
-  {
-    nuevo->sgte = sublista;
-    return nuevo;
-  }
-  nodoT *aux = sublista;
-  // buscar la posición correcta
-  while (aux->sgte != NULL && aux->sgte->info.id < t.id)
-  {
-    aux = aux->sgte;
-  }
-  nuevo->sgte = aux->sgte;
-  aux->sgte = nuevo;
-  return sublista;
-}
-
 void insertarTurnoEnArchivo(Turno nuevoTurno, int idMedico)
 {
   // Leer la lista desde el archivo
@@ -454,8 +430,7 @@ void insertarTurnoEnArchivo(Turno nuevoTurno, int idMedico)
   if (actual != NULL && actual->info.idMedico == idMedico)
   {
     // Insertar el turno en la sublista del médico
-    nodoT *nuevaSublista = insertarTurnoOrdenado(actual->info.sublista, nuevoTurno);
-    actual->info.sublista = nuevaSublista;
+    pushTurno(actual->info.sublista, nuevoTurno);
   }
   else
   {
@@ -465,8 +440,7 @@ void insertarTurnoEnArchivo(Turno nuevoTurno, int idMedico)
     nuevoNodo->info.sublista = NULL;
     nuevoNodo->sgte = actual;
     // Insertar el turno en la sublista del nuevo médico
-    nuevoNodo->info.sublista =
-        insertarTurnoOrdenado(nuevoNodo->info.sublista, nuevoTurno);
+    pushTurno(nuevoNodo->info.sublista, nuevoTurno);
     // reenlazar los nodos nodo en la lista principal
     if (anterior == NULL)
     {
@@ -779,7 +753,7 @@ void altaTurno(nodoLT *&listaLT, nodoLM *listaM, nodoLP *listaP,
             }
             if (confirmacion == 1)
             {
-              pushTurno(listaTurnos, t);
+              cout << "Turno confirmado" << endl;
               insertarTurnoEnArchivo(t, idMedico);
             }
           }
@@ -831,10 +805,7 @@ void turnosPendientes(nodoLT *listaLT, int idMedico, int mesL)
 {
   nodoT *listaAux = buscarListaTurnos(listaLT, idMedico);
   listaAux = filtarTurnosPorMes(listaAux, mesL);
-  if(listaAux == NULL) cout << "wow" << endl;
   listaAux = filtarTurnosPorEstatus(listaAux, 'P');
-  if(listaAux == NULL) cout << "wow2" << endl;
-
   // listar dia hora mes status
   char mesAux[15 + 1];
   obtenerMes(mesL, mesAux);
@@ -973,11 +944,37 @@ nodoLM *buscarMedico(nodoLM *lista, int id)
 nodoT *buscarListaTurnos(nodoLT *lista, int idMedico)
 {
   nodoLT *listaLT = lista;
+  nodoLT *anterior = NULL;
   while (listaLT != NULL && listaLT->info.idMedico != idMedico)
   {
+    anterior = listaLT;
     listaLT = listaLT->sgte;
   }
-  return listaLT->info.sublista;
+  if (listaLT != NULL && listaLT->info.idMedico == idMedico)
+  {
+    return listaLT->info.sublista;
+  }
+  else
+  {
+    // Crear un nuevo nodo para la lista del médico
+    nodoLT *nuevoNodo = new nodoLT;
+    nuevoNodo->info.idMedico = idMedico;
+    nuevoNodo->info.sublista = NULL;
+    nuevoNodo->sgte = listaLT;
+    // Insertar el turno en la sublista del nuevo médico
+    pushListaTurno(listaLT, nuevoNodo->info);
+    // reenlazar los nodos nodo en la lista principal
+    if (anterior == NULL)
+    {
+      listaLT = nuevoNodo; // nuevo primer nodo
+    }
+    else
+    {
+      anterior->sgte = nuevoNodo;
+    }
+    guardarListaTurnos(listaLT);
+    return listaLT->info.sublista;
+  }
 }
 
 int turnoDisponible(nodoT *lista, Turno turno)
