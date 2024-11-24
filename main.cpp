@@ -94,6 +94,7 @@ void cancelacionesPorMes(nodoLM *, nodoLT *, nodoLP *, int);
 int elegirEspecialidad(char[][50 + 1], int);
 int turnoDisponible(nodoT *, Turno);
 int elegirEspecialidad(char[][50 + 1]);
+int contarTurnos(nodoT*);
 nodoLP *buscarPacienteDni(nodoLP *, char[]);
 nodoLP *buscarPacienteId(nodoLP *, int);
 nodoLP *leerArchivoPacientes(FILE *);
@@ -730,6 +731,7 @@ void altaTurno(nodoLT *&listaLT, nodoLM *listaM, nodoLP *listaP,
       else
       {
         nodoT *listaTurnos = buscarListaTurnos(listaLT, idMedico);
+        int id = contarTurnos(listaTurnos) + 1;
         Turno t;
         int disponibilidad;
         cout << "Solicitando turno..." << endl;
@@ -758,6 +760,7 @@ void altaTurno(nodoLT *&listaLT, nodoLM *listaM, nodoLP *listaP,
             char dia[15 + 1];
             char mes[15 + 1];
             int confirmacion = 0;
+            t.id = id;
             t.idPaciente = p.id;
             t.estatus = 'P';
             obtenerDia(t.dia, dia);
@@ -828,7 +831,9 @@ void turnosPendientes(nodoLT *listaLT, int idMedico, int mesL)
 {
   nodoT *listaAux = buscarListaTurnos(listaLT, idMedico);
   listaAux = filtarTurnosPorMes(listaAux, mesL);
+  if(listaAux == NULL) cout << "wow" << endl;
   listaAux = filtarTurnosPorEstatus(listaAux, 'P');
+  if(listaAux == NULL) cout << "wow2" << endl;
 
   // listar dia hora mes status
   char mesAux[15 + 1];
@@ -1038,6 +1043,18 @@ nodoT *filtarTurnosPorMes(nodoT *lista, int mes)
     listaT = listaT->sgte;
   }
   return turnosFiltrados;
+}
+
+int contarTurnos(nodoT *lista)
+{
+  nodoT *listaT = lista;
+  int i = 0;
+  while (listaT != NULL)
+  {
+    i++;
+    listaT = listaT->sgte;
+  }
+  return i;
 }
 
 // UTILIDADES
