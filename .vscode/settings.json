@@ -3,6 +3,7 @@
         "*.php": "php",
         "*.blade.php": "blade",
         "*.html": "html",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "iostream": "cpp"
     }
 }
