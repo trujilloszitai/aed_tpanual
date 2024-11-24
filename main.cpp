@@ -719,8 +719,10 @@ void turnosPendientes(nodoLT * listaLT, int idMedico, int mesL) {
   char diaAux[15+1];
   while(listaAux != NULL && listaAux->info.sublista != NULL){
     if(listaAux->info.sublista->info.mes == mesL){
-      obtenerDia(listaAux->info.sublista->info.dia, diaAux);
-      cout<<"Turno dia: "<< diaAux << " | Hora: "<< listaAux->info.sublista->info.hora << "hs | Estado: "<<listaAux->info.sublista->info.estatus<<endl;
+      int dia = listaAux->info.sublista->info.dia;
+      obtenerDia(dia, diaAux);
+      cout << dia << endl;
+      cout<<"Turno dia: "<< diaAux << " " << dia << " | Hora: "<< listaAux->info.sublista->info.hora << "hs | Estado: "<<listaAux->info.sublista->info.estatus<<endl;
     }
     listaAux->info.sublista = listaAux->info.sublista->sgte;
   }
@@ -888,9 +890,7 @@ void obtenerEspecialidad(int idEsp, char txt[]){
 void obtenerDia(int dia, char txt[]) {
   char dias[7][15 + 1] = {"Domingo", "Lunes",   "Martes", "Miercoles",
                           "Jueves",  "Viernes", "Sabado"};
-  if (dia > 7 || dia < 1)
-    dia = 1;
-  strcpy(txt, dias[dia % 7] - 1);
+  strcpy(txt, dias[(dia % 7) - 1]);
 }
 
 void obtenerMes(int mes, char txt[]) {
