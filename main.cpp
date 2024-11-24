@@ -63,39 +63,38 @@ struct nodoLT {
   nodoLT *sgte;
 };
 
-void altaPaciente(nodoLP *&);
 void pushPaciente(nodoLP *&, Paciente);
+void altaPaciente(nodoLP *&);
 void altaMedico(nodoLM *&, nodoLT *&, char[][50 + 1]);
 void altaTurno(nodoLT *&, nodoLM *, nodoLP *, char[][50 + 1]);
 void pushMedico(nodoLM *&, Medico);
 void pushTurno(nodoT *&, Turno);
 void pushListaTurno(nodoLT *&, infoT);
-nodoLP *buscarPacienteDni(nodoLP *, char[]);
-infoT crearListaTurnos(int);
-nodoLP *buscarPaciente(nodoLP *, char[]);
-nodoLM *buscarMedico(nodoLM *, int);
-nodoT *buscarListaTurnos(nodoLT *, int);
-int turnoDisponible(nodoT *, Turno);
-nodoLP *leerArchivoPacientes(FILE *);
-nodoLM *leerArchivoMedicos(FILE *);
-nodoLT *leerArchivoTurnos();
-nodoT *insertarTurnoOrdenado(nodoT *, Turno);
 void guardarListaTurnos(nodoLT *lista);
 void insertarTurnoEnArchivo(Turno, int);
 void cargarArchivoPacientes(FILE *, Paciente[]);
 void cargarArchivoMedicos(FILE *, Medico[]);
 void cargarArchivoTurnos(FILE *, infoT[]);
-int elegirEspecialidad(char[][50 + 1], int);
-nodoLM *filtrarMedicos(nodoLM *, int);
 void obtenerDia(int, char[]);
 void obtenerMes(int, char[]);
-int elegirEspecialidad(char[][50 + 1]);
 void actualizarStatus(nodoLT *&, int, int);
 void turnosPendientes(nodoLT*, int, int);
 void atencionesEfectivas(nodoLT*, int);
 void obtenerEspecialidad(int , char[]);
-nodoLP * buscarPacienteId(nodoLP*, int);
 void cancelacionesPorMes(nodoLM *, nodoLT *, nodoLP *, int);
+int elegirEspecialidad(char[][50 + 1], int);
+int turnoDisponible(nodoT *, Turno);
+int elegirEspecialidad(char[][50 + 1]);
+nodoLP *buscarPacienteDni(nodoLP *, char[]);
+nodoLP * buscarPacienteId(nodoLP*, int);
+nodoLP *leerArchivoPacientes(FILE *);
+nodoLM *leerArchivoMedicos(FILE *);
+nodoLM *buscarMedico(nodoLM *, int);
+nodoLM *filtrarMedicos(nodoLM *, int);
+nodoLT *leerArchivoTurnos();
+nodoT *buscarListaTurnos(nodoLT *, int);
+nodoT *insertarTurnoOrdenado(nodoT *, Turno);
+infoT crearListaTurnos(int);
 
 int main() {
   char especialidades[20][50 + 1] = {"Cardiologia",      "Pediatria",
@@ -286,92 +285,79 @@ nodoLM *leerArchivoMedicos(FILE *f) {
 //   return lp;
 // }
 nodoLT *leerArchivoTurnos() {
-  // Leer la cantidad de nodos principales
+  // Contar la cantidad de nodos
   FILE* f = fopen("turnos.bin", "rb+");
   int N;
   fread(&N, sizeof(int), 1, f);
-  nodoLT *lista = NULL;
+  nodoLT *listaTurnos = NULL;
   nodoLT *ultimo = NULL;
   for (int i = 0; i < N; i++) {
-    // Crear un nuevo nodo principal
-    nodoLT *nuevo = new nodoLT;
-    nuevo->sgte = NULL;
-
+    // Crear un nuevo nodo
+    nodoLT *nuevaLista = new nodoLT;
+    nuevaLista->sgte = NULL;
     // Leer el idMedico
-    fread(&nuevo->info.idMedico, sizeof(int), 1, f);
-
+    fread(&nuevaLista->info.idMedico, sizeof(int), 1, f);
     // Leer la cantidad de turnos en la sublista
     int cantidadTurnos;
     fread(&cantidadTurnos, sizeof(int), 1, f);
-
     // Leer los turnos de la sublista
     nodoT *sublista = NULL;
-    nodoT *ultimoSub = NULL;
-
+    nodoT *ultimaSub = NULL;
     for (int j = 0; j < cantidadTurnos; j++) {
       // Crear un nuevo nodo de turno
       nodoT *nuevoTurno = new nodoT;
       nuevoTurno->sgte = NULL;
-
-      // Leer los datos del turno
       fread(&nuevoTurno->info, sizeof(Turno), 1, f);
-
-      // Insertar en la sublista
       if (sublista == NULL) {
         sublista = nuevoTurno;
       } else {
-        ultimoSub->sgte = nuevoTurno;
+        ultimaSub->sgte = nuevoTurno;
       }
-      ultimoSub = nuevoTurno;
+      ultimaSub = nuevoTurno;
     }
-
-    nuevo->info.sublista = sublista;
-
+    nuevaLista->info.sublista = sublista;
     // Insertar en la lista principal
-    if (lista == NULL) {
-      lista = nuevo;
+    if (listaTurnos == NULL) {
+      listaTurnos = nuevaLista;
     } else {
-      ultimo->sgte = nuevo;
+      ultimo->sgte = nuevaLista;
     }
-    ultimo = nuevo;
+    ultimo = nuevaLista;
   }
 
   fclose(f);
-  return lista;
+  return listaTurnos;
 }
 
 void guardarListaTurnos(nodoLT *lista) {
   FILE *fp = fopen("turnos.bin", "rb+");
   // contar cantidad de nodos
-  int cantidadNodos = 0;
-  nodoLT *temp = lista;
-  while (temp != NULL) {
-    cantidadNodos++;
-    temp = temp->sgte;
+  int N = 0;
+  nodoLT *listaLT = lista;
+  while (listaLT != NULL) {
+    N++;
+    listaLT = listaLT->sgte;
   }
-  // escribir cantidad de nodos
-  fwrite(&cantidadNodos, sizeof(int), 1, fp);
-  // escribir nodos y sus sublistas
-  temp = lista;
-  while (temp != NULL) {
-    // Escribir el idMedico
-    fwrite(&temp->info.idMedico, sizeof(int), 1, fp);
-    // Contar la cantidad de turnos en la sublista
+  fwrite(&N, sizeof(int), 1, fp);
+  listaLT = lista;
+  while (listaLT != NULL) {
+    fwrite(&listaLT->info.idMedico, sizeof(int), 1, fp);
+    // cantidad de turnos en la sublista
     int cantidadTurnos = 0;
-    nodoT *subtemp = temp->info.sublista;
-    while (subtemp != NULL) {
+    nodoT *sublista = listaLT->info.sublista;
+    while (sublista != NULL) {
       cantidadTurnos++;
-      subtemp = subtemp->sgte;
+      sublista = sublista->sgte;
     }
     // Escribir la cantidad de turnos
     fwrite(&cantidadTurnos, sizeof(int), 1, fp);
     // Escribir cada turno en la sublista
-    subtemp = temp->info.sublista;
-    while (subtemp != NULL) {
-      fwrite(&subtemp->info, sizeof(Turno), 1, fp);
-      subtemp = subtemp->sgte;
+    sublista = listaLT->info.sublista;
+    while (sublista != NULL) {
+      fwrite(&sublista->info, sizeof(Turno), 1, fp);
+      sublista = sublista->sgte;
     }
-    temp = temp->sgte;
+    listaLT = listaLT->sgte;
   }
   fclose(fp);
 }
@@ -381,16 +367,18 @@ nodoT *insertarTurnoOrdenado(nodoT *sublista, Turno t) {
   nodoT *nuevo = new nodoT;
   nuevo->info = t;
   nuevo->sgte = NULL;
+  // determinar si la lista está vacía o si el turno a insertar debe ser el primero
   if (sublista == NULL || sublista->info.id > t.id) {
     nuevo->sgte = sublista;
     return nuevo;
   }
-  nodoT *actual = sublista;
-  while (actual->sgte != NULL && actual->sgte->info.id < t.id) {
-    actual = actual->sgte;
+  nodoT *aux = sublista;
+  // buscar la posición correcta
+  while (aux->sgte != NULL && aux->sgte->info.id < t.id) {
+    aux = aux->sgte;
   }
-  nuevo->sgte = actual->sgte;
-  actual->sgte = nuevo;
+  nuevo->sgte = aux->sgte;
+  aux->sgte = nuevo;
   return sublista;
 }
 
@@ -417,9 +405,9 @@ void insertarTurnoEnArchivo(Turno nuevoTurno, int idMedico) {
     // Insertar el turno en la sublista del nuevo médico
     nuevoNodo->info.sublista =
         insertarTurnoOrdenado(nuevoNodo->info.sublista, nuevoTurno);
-    // Conectar el nuevo nodo en la lista principal
+    // reenlazar los nodos nodo en la lista principal
     if (anterior == NULL) {
-      lista = nuevoNodo; // Es el nuevo primer nodo
+      lista = nuevoNodo; // nuevo primer nodo
     } else {
       anterior->sgte = nuevoNodo;
     }
@@ -429,6 +417,7 @@ void insertarTurnoEnArchivo(Turno nuevoTurno, int idMedico) {
   guardarListaTurnos(lista);
 
   // Liberar memoria de la lista en memoria
+  // (hacemos esto porque la lista de turnos es de las cosas que más memoria consumiría)
   nodoLT *temp;
   while (lista != NULL) {
     temp = lista;
@@ -678,6 +667,7 @@ void altaTurno(nodoLT *&listaLT, nodoLM *listaM, nodoLP *listaP,
                 cin >> confirmacion;
               }
               if (confirmacion == 1) {
+                pushTurno(listaTurnos, t);
                 insertarTurnoEnArchivo(t, idMedico);
               }
             }
