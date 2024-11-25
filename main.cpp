@@ -138,22 +138,13 @@ int main()
       case 1:
         cout << "Gestion de Pacientes - Seleccione una accion" << endl;
         cout << "Nuevo paciente (1)" << endl;
-        cout << "Buscar paciente (2)" << endl;
-        cout << "Listar pacientes (3)" << endl;
         break;
       case 2:
         cout << "Gestion de Medicos - Seleccione una accion" << endl;
         cout << "Nuevo medico (1)" << endl;
-        cout << "Buscar medico (2)" << endl;
-        cout << "Listar medicos (3)" << endl;
-        cout << "Ver atenciones efectivas (4)" << endl;
+        cout << "Ver atenciones efectivas (2)" << endl;
         break;
       case 3:
-        cout << "Gestion de Especialidades - Seleccione una accion" << endl;
-        cout << "Listar especialidades (1)" << endl;
-        cout << "Buscar especialidad (2)" << endl;
-        break;
-      case 4:
         cout << "Gestion de Turnos - Seleccione una accion" << endl;
         cout << "Nuevo turno (1)" << endl;
         cout << "Actualizar turno (2)" << endl;
@@ -174,12 +165,6 @@ int main()
           case 1:
             altaPaciente(ListaDeP);
             break;
-          case 2:
-            // buscar paciente
-            break;
-          case 3:
-            // listar pacientes
-            break;
           }
           break;
         case 2:
@@ -190,10 +175,6 @@ int main()
             altaMedico(ListaDeM, ListaLT, especialidades);
             break;
           case 2:
-            break;
-          case 3:
-            break;
-          case 4:
             // atenciones efectivas
             int mes;
             cout << "Ingrese el mes del que quiere ver las atenciones efectivas del 1 al 12, siendo 1 el mes Enero: ";
@@ -203,16 +184,6 @@ int main()
           }
           break;
         case 3:
-          // Especialidades
-          switch (accion)
-          {
-          case 1:
-            break;
-          case 2:
-            break;
-          }
-          break;
-        case 4:
           // Turnos
           switch (accion)
           {
@@ -230,7 +201,6 @@ int main()
             cout << "Indique el id del medico: ";
             cin >> idMedico;
             turnosDelMedico = buscarListaTurnos(ListaLT, idMedico);
-
             cout << "Indique el id del turno: ";
             cin >> idTurno;
             actualizarStatus(ListaLT, idTurno, idMedico);
@@ -271,8 +241,7 @@ int main()
       cout << "Menu principal - Seleccione una opcion" << endl;
       cout << "Pacientes (1)" << endl;
       cout << "Medicos (2)" << endl;
-      cout << "Especialidades (3)" << endl;
-      cout << "Turnos (4)" << endl;
+      cout << "Turnos (3)" << endl;
       cin >> opcion;
     }
 
@@ -419,7 +388,7 @@ void insertarTurnoEnArchivo(Turno nuevoTurno, int idMedico)
 {
   // Leer la lista desde el archivo
   nodoLT *lista = leerArchivoTurnos();
-  // Buscar si el médico ya existe
+  // Buscar si el medico ya existe
   nodoLT *actual = lista;
   nodoLT *anterior = NULL;
   while (actual != NULL && actual->info.idMedico < idMedico)
@@ -429,17 +398,17 @@ void insertarTurnoEnArchivo(Turno nuevoTurno, int idMedico)
   }
   if (actual != NULL && actual->info.idMedico == idMedico)
   {
-    // Insertar el turno en la sublista del médico
+    // Insertar el turno en la sublista del medico
     pushTurno(actual->info.sublista, nuevoTurno);
   }
   else
   {
-    // Crear un nuevo nodo para la lista del médico
+    // Crear un nuevo nodo para la lista del medico
     nodoLT *nuevoNodo = new nodoLT;
     nuevoNodo->info.idMedico = idMedico;
     nuevoNodo->info.sublista = NULL;
     nuevoNodo->sgte = actual;
-    // Insertar el turno en la sublista del nuevo médico
+    // Insertar el turno en la sublista del nuevo medico
     pushTurno(nuevoNodo->info.sublista, nuevoTurno);
     // reenlazar los nodos nodo en la lista principal
     if (anterior == NULL)
@@ -456,7 +425,7 @@ void insertarTurnoEnArchivo(Turno nuevoTurno, int idMedico)
   guardarListaTurnos(lista);
 
   // Liberar memoria de la lista en memoria
-  // (hacemos esto porque la lista de turnos es de las cosas que más memoria consumiría)
+  // (hacemos esto porque la lista de turnos es de las cosas que mas memoria consumiria)
   nodoLT *temp;
   while (lista != NULL)
   {
@@ -547,7 +516,7 @@ int elegirMedico(nodoLM *lista)
     i++;
   }
 
-  cout << "Elija el médico deseado: ";
+  cout << "Elija el medico deseado: ";
   while (idElegido < 1 || idElegido > i + 1)
   {
     cin >> idElegido;
@@ -746,7 +715,7 @@ void altaTurno(nodoLT *&listaLT, nodoLM *listaM, nodoLP *listaP,
             cout << "¿Desea confirmar el turno?" << endl;
             cout << "Confirmar (1)" << endl;
             cout << "Cancelar (2)" << endl;
-            cout << "Ingrese una opción: ";
+            cout << "Ingrese una opcion: ";
             while (confirmacion != 1 && confirmacion != 2)
             {
               cin >> confirmacion;
@@ -956,12 +925,12 @@ nodoT *buscarListaTurnos(nodoLT *lista, int idMedico)
   }
   else
   {
-    // Crear un nuevo nodo para la lista del médico
+    // Crear un nuevo nodo para la lista del medico
     nodoLT *nuevoNodo = new nodoLT;
     nuevoNodo->info.idMedico = idMedico;
     nuevoNodo->info.sublista = NULL;
     nuevoNodo->sgte = listaLT;
-    // Insertar el turno en la sublista del nuevo médico
+    // Insertar el turno en la sublista del nuevo medico
     pushListaTurno(listaLT, nuevoNodo->info);
     // reenlazar los nodos nodo en la lista principal
     if (anterior == NULL)
