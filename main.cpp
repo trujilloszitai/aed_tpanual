@@ -758,6 +758,7 @@ void actualizarStatus(nodoLT *&listaLT, int idTurno, int IDmedico)
     {
       listaAux->info.sublista->info.estatus = newStat;
       cout << "El status se actualizo con exito" << endl;
+      guardarListaTurnos(listaAux);
     }
     else
     {
